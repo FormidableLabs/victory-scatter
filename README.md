@@ -13,6 +13,6 @@ Please see [DEVELOPMENT](DEVELOPMENT.md)
 
 Please see [CONTRIBUTING](CONTRIBUTING.md)
 
-[trav_img]: https://api.travis-ci.org/FormidableLabs/victory-component-boilerplate.svg
-[trav_site]: https://travis-ci.org/FormidableLabs/victory-component-boilerplate
+[trav_img]: https://api.travis-ci.org/FormidableLabs/victory-scatter.svg
+[trav_site]: https://travis-ci.org/FormidableLabs/victory-scatter
 
