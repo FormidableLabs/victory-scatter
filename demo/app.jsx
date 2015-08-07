@@ -1,27 +1,12 @@
-/*global document:false*/
+/*global document:false window:false*/
 import React from "react";
 import Radium from "radium";
 import _ from "lodash";
 import {VictoryScatter} from "../src/index";
 
 const getData = function () {
-  let seriesNumber = "Three";
-
-  return _.map(_.range(100), () => {
-    switch (seriesNumber) {
-      case "One":
-        seriesNumber = "Two";
-        break;
-      case "Two":
-        seriesNumber = "Three";
-        break;
-      case "Three":
-        seriesNumber = "One";
-        break;
-      // no default
-    }
-
-    return { x: _.random(1200), y: _.random(600), z: "series" + seriesNumber };
+  return _.map(_.range(200), (index) => {
+    return { x: _.random(1200), y: _.random(600), z: "series" + _.round(index / 28) };
   });
 };
 
@@ -32,9 +17,16 @@ class App extends React.Component {
     this.state = {
       data: this.props.data,
       height: 600,
-      dotColors: ["pink", "lightblue", "gold"],
       width: 1200
     };
+  }
+
+  componentDidMount() {
+    window.setInterval(() => {
+      this.setState({
+        data: getData()
+      });
+    }, 2000);
   }
 
   getStyles() {
@@ -51,7 +43,6 @@ class App extends React.Component {
       <div style={this.getStyles()}>
         <VictoryScatter
           data={this.state.data}
-          dotColors={this.state.dotColors}
           height={this.state.height}
           width={this.state.width}/>
       </div>
