@@ -9,14 +9,15 @@ class VictoryScatter extends React.Component {
     super(props);
     this.state = { data: this.props.data };
     this.symbolSvgPaths = {
-      circle: "M0,5 m-5,-5 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0",
-      diamond: "M5,0 l7,7 l-7,7 l-7,-7 z",
-      plus: "M3,0 l4,0 l0,4 l4,0 l0,4 l-4,0 l0,4 l-4,0 l0,-4 l-4,0 l0,-4 l4,0 z",
+      circle: "M-5,0a5,5 0 1,0 10,0a5,5 0 1,0 -10,0",
+      diamond: "M0,-6.5 l6.5,6.5 l-6.5,6.5 l-6.5,-6.5 z",
+      plus: "M-1.75,-5 l3.3,0 l0,3.3 l3.3,0 l0,3.3 l-3.3,0 l0,3.3 l-3.3,0 l0,-3.3 l-3.3,0" +
+        "l0,-3.3 l3.3,0 z",
       star: "M0,3.5 L4.114,5.663 L3.329,1.082 L6.657,-2.163 L2.057,-2.832 L0,-7 L-2.057,-2.832" +
         "L-6.657,-2.163 L-3.329,1.082 L-4.114,5.663 Z",
-      square: "M0,0 l0,9 l-9,0 l0,-9 z",
-      triangleDown: "M0,0 l-5.5,9.526 l-5.5,-9.526 z",
-      triangleUp: "M0,9.526 l-5.5,-9.526 l-5.5,9.526 z"
+      square: "M4.5,-4.5 l0,9 l-9,0 l0,-9 z",
+      triangleDown: "M5.5,-4.763 l-5.5,9.526 l-5.5,-9.526 z",
+      triangleUp: "M5.5,4.763 l-5.5,-9.526 l-5.5,9.526 z"
     };
   }
 
