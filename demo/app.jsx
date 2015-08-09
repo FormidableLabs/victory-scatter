@@ -5,8 +5,18 @@ import _ from "lodash";
 import {VictoryScatter} from "../src/index";
 
 const getData = function () {
-  return _.map(_.range(200), (index) => {
-    return { x: _.random(1200), y: _.random(600), z: "series" + _.round(index / 28) };
+  const colors = ["pink", "lightblue", "gold", "orange", "lightgreen", "lavender", "tan"];
+  const symbols = ["circle", "star", "square", "triangleUp", "triangleDown", "diamond", "plus"];
+
+  return _.map(_.range(100), (index) => {
+    const scaledIndex = _.round(index / 16);
+
+    return {
+      x: _.random(1200),
+      y: _.random(600),
+      symbol: symbols[scaledIndex],
+      color: colors[scaledIndex]
+    };
   });
 };
 
@@ -51,11 +61,7 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  data: React.PropTypes.arrayOf(React.PropTypes.shape({
-    x: React.PropTypes.number,
-    y: React.PropTypes.number,
-    z: React.PropTypes.string
-  }))
+  data: React.PropTypes.arrayOf(React.PropTypes.object)
 };
 
 const content = document.getElementById("content");

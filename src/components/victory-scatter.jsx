@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-import d3 from "d3";
 import _ from "lodash";
 import {VictoryAnimation} from "victory-animation";
 
@@ -8,50 +7,47 @@ import {VictoryAnimation} from "victory-animation";
 class VictoryScatter extends React.Component {
   constructor(props) {
     super(props);
-    this.colors = d3.scale.ordinal().range(this.props.dotColors);
-    this.symbols = d3.scale.ordinal().range([
-      "M0,5 m-5,-5 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0", // circle
-      "M 0.000 3.500 L 4.114 5.663 L 3.329 1.082 L 6.657 -2.163 L 2.057 -2.832 L 0.000 -7.000" +
-        "L -2.057 -2.832 L -6.657 -2.163 L -3.329 1.082 L -4.114 5.663 L 0.000 3.500", // star
-      "M0,0 l0,9 l-9,0 l0,-9 z", // square
-      "M0,9.526 l-5.5,-9.526 l-5.5,9.526 z", // up triangle
-      "M0,0 l-5.5,9.526 l-5.5,-9.526 z", // down triangle
-      "M5,0 l7,7 l-7,7 l-7,-7 z", // diamond
-      "M3,0 l4,0 l0,4 l4,0 l0,4 l-4,0 l0,4 l-4,0 l0,-4 l-4,0 l0,-4 l4,0 z" // plus
-    ]);
+    this.symbolPaths = {
+      circle: "M0,5 m-5,-5 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0",
+      diamond: "M5,0 l7,7 l-7,7 l-7,-7 z",
+      plus: "M3,0 l4,0 l0,4 l4,0 l0,4 l-4,0 l0,4 l-4,0 l0,-4 l-4,0 l0,-4 l4,0 z",
+      star: "M0,3.5 L4.114,5.663 L3.329,1.082 L6.657,-2.163 L2.057,-2.832 L0,-7 L-2.057,-2.832" +
+        "L-6.657,-2.163 L-3.329,1.082 L-4.114,5.663 Z",
+      square: "M0,0 l0,9 l-9,0 l0,-9 z",
+      triangleDown: "M0,0 l-5.5,9.526 l-5.5,-9.526 z",
+      triangleUp: "M0,9.526 l-5.5,-9.526 l-5.5,9.526 z"
+    };
   }
 
-  drawDots() {
-    const dotComponents = _.map(this.props.data, (dot, index) => {
+  drawDataPoints() {
+    const dataPointComponents = _.map(this.props.data, (dataPoint, index) => {
       return (
-        <VictoryAnimation data={dot} key={index}>
+        <VictoryAnimation data={dataPoint} key={index}>
           {(data) => {
             return (
               <path
-                d={this.symbols(data.z)}
-                transform={"translate(" + data.x + "," + (this.props.height - data.y) +
-                  ") scale(" + this.props.symbolScale + ")"}
-                fill={this.colors(data.z)}
+                d={this.symbolPaths[data.symbol] || data.symbol || this.symbolPaths.circle}
+                fill={data.color || this.props.color}
                 key={index}
-                stroke={this.props.stroke}
-                strokeWidth="1px"
-                opacity={this.props.opacity}
-                shapeRendering="geometricPrecision"/>
+                opacity={data.opacity || this.props.opacity}
+                shapeRendering={data.shapeRendering || this.props.shapeRendering}
+                stroke={data.borderColor || this.props.borderColor}
+                strokeWidth={data.borderWidth || this.props.borderWidth}
+                transform={"translate(" + data.x + "," + (this.props.height - data.y) + ") " +
+                  "scale(" + (data.scale || this.props.scale) + ")"}/>
             );
           }}
         </VictoryAnimation>
       );
     });
 
-    return (<g>{dotComponents}</g>);
+    return (<g>{dataPointComponents}</g>);
   }
 
   render() {
     return (
-      <svg
-        height={this.props.height}
-        width={this.props.width}>
-        {this.drawDots()}
+      <svg height={this.props.height} width={this.props.width}>
+        {this.drawDataPoints()}
       </svg>
     );
   }
@@ -59,34 +55,31 @@ class VictoryScatter extends React.Component {
 
 VictoryScatter.propTypes = {
   borderColor: React.PropTypes.string,
-  data: React.PropTypes.arrayOf(React.PropTypes.shape({
-    x: React.PropTypes.number,
-    y: React.PropTypes.number,
-    z: React.PropTypes.string
-  })),
-  dotColors: React.PropTypes.arrayOf(React.PropTypes.string),
+  borderWidth: React.PropTypes.number,
+  color: React.PropTypes.string,
+  data: React.PropTypes.arrayOf(React.PropTypes.object),
   height: React.PropTypes.number,
   opacity: React.PropTypes.number,
-  stroke: React.PropTypes.string,
-  symbolScale: React.PropTypes.number,
+  scale: React.PropTypes.number,
+  shapeRendering: React.PropTypes.oneOf([
+    "auto",
+    "optimizeSpeed",
+    "crispEdges",
+    "geometricPrecision",
+    "inherit"
+  ]),
   width: React.PropTypes.number
 };
 
 VictoryScatter.defaultProps = {
-  borderColor: "black",
-  data: [
-    { x: 20, y: 20, z: "sampleSeriesOne" },
-    { x: 30, y: 30, z: "sampleSeriesOne" },
-    { x: 100, y: 100, z: "sampleSeriesTwo" },
-    { x: 110, y: 110, z: "sampleSeriesTwo" },
-    { x: 200, y: 200, z: "sampleSeriesThree" },
-    { x: 210, y: 210, z: "sampleSeriesThree" }
-  ],
-  dotColors: ["pink", "lightblue", "gold", "orange", "lightgreen", "lavender", "tan"],
-  height: 800,
+  borderColor: "transparent",
+  borderWidth: 1,
+  color: "red",
+  data: [{}],
+  height: 600,
   opacity: 1,
-  stroke: "none",
-  symbolScale: 1,
+  scale: 1,
+  shapeRendering: "auto",
   width: 1200
 };
 
