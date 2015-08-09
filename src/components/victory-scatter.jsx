@@ -7,7 +7,8 @@ import {VictoryAnimation} from "victory-animation";
 class VictoryScatter extends React.Component {
   constructor(props) {
     super(props);
-    this.symbolPaths = {
+    this.state = { data: this.props.data };
+    this.symbolSvgPaths = {
       circle: "M0,5 m-5,-5 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0",
       diamond: "M5,0 l7,7 l-7,7 l-7,-7 z",
       plus: "M3,0 l4,0 l0,4 l4,0 l0,4 l-4,0 l0,4 l-4,0 l0,-4 l-4,0 l0,-4 l4,0 z",
@@ -19,14 +20,45 @@ class VictoryScatter extends React.Component {
     };
   }
 
-  drawDataPoints() {
-    const dataPointComponents = _.map(this.props.data, (dataPoint, index) => {
+  componentWillMount() {
+    if (this.props.scaleToFit) {
+      this.scaleDataToFitChart(this.props.data);
+    }
+  }
+
+  componentWillReceiveProps() {
+    if (this.props.scaleToFit) {
+      this.scaleDataToFitChart(this.props.data);
+    } else {
+      this.setState({ data: this.props.data });
+    }
+  }
+
+  scaleDataToFitChart(data) {
+    const xMax = _.max(_.pluck(data, "x"));
+    const yMax = _.max(_.pluck(data, "y"));
+
+    const xMultiplier = _.floor(this.props.width / xMax, 1);
+    const yMultiplier = _.floor(this.props.height / yMax, 1);
+    const minMultiplier = _.min([xMultiplier, yMultiplier]);
+
+    const scaledData = _.cloneDeep(data);
+    _.forEach(scaledData, (dataPoint) => {
+      dataPoint.x *= minMultiplier;
+      dataPoint.y *= minMultiplier;
+    });
+
+    this.setState({ data: scaledData });
+  }
+
+  plotDataPoints() {
+    const dataPointComponents = _.map(this.state.data, (dataPoint, index) => {
       return (
         <VictoryAnimation data={dataPoint} key={index}>
           {(data) => {
             return (
               <path
-                d={this.symbolPaths[data.symbol] || data.symbol || this.symbolPaths.circle}
+                d={this.symbolSvgPaths[data.symbol] || data.symbol || this.symbolSvgPaths.circle}
                 fill={data.color || this.props.color}
                 key={index}
                 opacity={data.opacity || this.props.opacity}
@@ -47,7 +79,7 @@ class VictoryScatter extends React.Component {
   render() {
     return (
       <svg height={this.props.height} width={this.props.width}>
-        {this.drawDataPoints()}
+        {this.plotDataPoints()}
       </svg>
     );
   }
@@ -61,6 +93,7 @@ VictoryScatter.propTypes = {
   height: React.PropTypes.number,
   opacity: React.PropTypes.number,
   scale: React.PropTypes.number,
+  scaleToFit: React.PropTypes.bool,
   shapeRendering: React.PropTypes.oneOf([
     "auto",
     "optimizeSpeed",
@@ -79,6 +112,7 @@ VictoryScatter.defaultProps = {
   height: 600,
   opacity: 1,
   scale: 1,
+  scaleToFit: true,
   shapeRendering: "auto",
   width: 1200
 };

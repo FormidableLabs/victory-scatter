@@ -12,8 +12,8 @@ const getData = function () {
     const scaledIndex = _.round(index / 16);
 
     return {
-      x: _.random(1200),
-      y: _.random(600),
+      x: _.random(20, true),
+      y: _.random(10, true),
       symbol: symbols[scaledIndex],
       color: colors[scaledIndex]
     };
