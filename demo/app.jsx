@@ -53,6 +53,7 @@ class App extends React.Component {
       <div style={this.getStyles()}>
         <VictoryScatter
           data={this.state.data}
+          domain={{ x: [0, 1400], y: [0, 700] }}
           height={this.state.height}
           width={this.state.width}/>
       </div>
