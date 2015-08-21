@@ -11,6 +11,18 @@ class VictoryScatter extends React.Component {
     this.state = { symbolSvgPaths: this.getSymbolPaths() };
   }
 
+  getStyles() {
+    return _.merge({
+      borderColor: "transparent",
+      borderWidth: 0,
+      color: "black",
+      opacity: 0.8,
+      margin: 5,
+      width: 500,
+      height: 200
+    }, this.props.style);
+  }
+
   getSymbolPath(symbol) {
     switch (symbol) {
       case "circle":
@@ -46,11 +58,12 @@ class VictoryScatter extends React.Component {
   }
 
   getScale(axis) {
+    const style = this.getStyles();
     let domain = this.props.domain;
     const isXAxisData = axis === "x";
     const range = isXAxisData ?
-      [this.props.maxBubbleRadius, this.props.width - this.props.maxBubbleRadius] :
-      [this.props.height - this.props.maxBubbleRadius, this.props.maxBubbleRadius];
+      [this.props.maxBubbleRadius, style.width - this.props.maxBubbleRadius] :
+      [style.height - this.props.maxBubbleRadius, this.props.maxBubbleRadius];
     const scale = d3.scale.linear().range(range);
 
     if (_.isArray(domain)) {
@@ -88,22 +101,22 @@ class VictoryScatter extends React.Component {
           d: this.state.symbolSvgPaths[dataPoint.symbol] || dataPoint.symbol
         });
       }
-
+      const style = this.getStyles();
       return (
         <VictoryAnimation data={dataPoint} key={index}>
           {(data) => {
             return (
               <g
                 transform={"translate(" + xScale(data.x) + " " +
-                  (this.props.height - yScale(data.y)) + ")"}>
+                  (style.height - yScale(data.y)) + ")"}>
                 <path
                   d={data.d || this.state.symbolSvgPaths.circle}
-                  fill={data.color || this.props.color}
+                  fill={data.color || style.color}
                   key={index}
-                  opacity={data.opacity || this.props.opacity}
+                  opacity={data.opacity || style.opacity}
                   shapeRendering={data.shapeRendering || this.props.shapeRendering}
-                  stroke={data.borderColor || this.props.borderColor}
-                  strokeWidth={data.borderWidth || this.props.borderWidth}
+                  stroke={data.borderColor || style.borderColor}
+                  strokeWidth={data.borderWidth || style.borderWidth}
                   transform={"scale(" + (zScale && data.z ? zScale(data.z) : data.symbolScale ||
                     this.props.symbolScale) + ")"}/>
                 {data.label ? (
@@ -126,9 +139,9 @@ class VictoryScatter extends React.Component {
 
   render() {
     return (
-      <svg height={this.props.height} width={this.props.width}>
+      <g style={this.getStyles()}>
         {this.plotDataPoints()}
-      </svg>
+      </g>
     );
   }
 }
@@ -167,18 +180,12 @@ VictoryScatter.propTypes = {
 };
 
 VictoryScatter.defaultProps = {
-  borderColor: "transparent",
-  borderWidth: 0,
   bubble: false,
-  color: "red",
   data: [{}],
   domain: null,
-  height: 600,
   maxBubbleRadius: 0,
-  opacity: 0.8,
   symbolScale: 1,
   shapeRendering: "auto",
-  width: 1200
 };
 
 export default VictoryScatter;
