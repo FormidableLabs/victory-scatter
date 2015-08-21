@@ -1,26 +1,27 @@
-/*global document:false window:false*/
+/*global document:false */
 import React from "react";
 import Radium from "radium";
-import _ from "lodash";
+// import _ from "lodash";
 import {VictoryScatter} from "../src/index";
+import bubbleData from "./bubble-data.js";
 
-const getData = function () {
-  const colors =
-    ["Violet", "CornflowerBlue", "Gold", "Orange", "Turquoise", "Tomato", "GreenYellow"];
-  const symbols = ["circle", "star", "square", "triangleUp", "triangleDown", "diamond", "plus"];
+// const getData = function () {
+//   const colors =
+//     ["violet", "cornflowerblue", "gold", "orange", "turquoise", "tomato", "greenyellow"];
+//   const symbols = ["circle", "star", "square", "triangleUp", "triangleDown", "diamond", "plus"];
 
-  return _.map(_.range(42), (index) => {
-    const scaledIndex = _.floor(index / 6);
+//   return _.map(_.range(200), (index) => {
+//     const scaledIndex = _.floor(index / 29);
 
-    return {
-      x: _.random(1200),
-      y: _.random(600),
-      symbol: symbols[scaledIndex],
-      symbolScale: _.random(2, 10),
-      color: colors[_.random(0, 6)]
-    };
-  });
-};
+//     return {
+//       x: _.random(1200),
+//       y: _.random(600),
+//       symbolScale: _.random(1, 6),
+//       symbol: symbols[scaledIndex],
+//       color: colors[_.random(0, 6)]
+//     };
+//   });
+// };
 
 @Radium
 class App extends React.Component {
@@ -33,13 +34,13 @@ class App extends React.Component {
     };
   }
 
-  componentDidMount() {
-    window.setInterval(() => {
-      this.setState({
-        data: getData()
-      });
-    }, 3000);
-  }
+  // componentDidMount() {
+  //   window.setInterval(() => {
+  //     this.setState({
+  //       data: getData()
+  //     });
+  //   }, 3000);
+  // }
 
   getStyles() {
     return {
@@ -54,11 +55,12 @@ class App extends React.Component {
     return (
       <div style={this.getStyles()}>
         <VictoryScatter
+          bubble={true}
+          maxBubbleRadius={this.state.height / 10}
           data={this.state.data}
-          domain={{ x: [0, this.state.width], y: [0, this.state.height] }}
           height={this.state.height}
           width={this.state.width}
-          opacity={0.6}/>
+          color="cornflowerblue"/>
       </div>
     );
   }
@@ -69,4 +71,4 @@ App.propTypes = {
 };
 
 const content = document.getElementById("content");
-React.render(<App data={getData()}/>, content);
+React.render(<App data={bubbleData}/>, content);
