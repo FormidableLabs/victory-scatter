@@ -306,7 +306,6 @@ VictoryScatter.propTypes = {
 };
 
 VictoryScatter.defaultProps = {
-  bubble: false,
   size: 3,
   symbol: "circle",
   shapeRendering: "auto",
