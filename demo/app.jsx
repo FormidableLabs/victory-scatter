@@ -57,6 +57,7 @@ class App extends React.Component {
             x: [0, 1200],
             y: [600, 0]
           }}
+          animate={true}
           data={this.state.data}/>
       </svg>
     );

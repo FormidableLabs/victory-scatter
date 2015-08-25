@@ -209,11 +209,11 @@ class VictoryScatter extends React.Component {
     }
   }
 
-  plotDataPoints() {
+  plotAnimatedPoints() {
     const xScale = this.getScale("x");
     const yScale = this.getScale("y");
 
-    const dataPoints = _.map(this.props.data, (dataPoint, index) => {
+    return _.map(this.props.data, (dataPoint, index) => {
       const style = this.getStyles();
       return (
         <VictoryAnimation data={dataPoint} key={index}>
@@ -223,43 +223,68 @@ class VictoryScatter extends React.Component {
             const size = this.getSize(data);
             const symbol = data.symbol || this.props.symbol;
             return (
-              <g style={this.getStyles()}>
-                <path
-                  d={data.path || this.getPath({symbol, size, x, y})}
-                  fill={data.color || style.color}
-                  key={index}
-                  opacity={data.opacity || style.opacity}
-                  shapeRendering={data.shapeRendering || this.props.shapeRendering}
-                  stroke={data.borderColor || style.borderColor}
-                  strokeWidth={data.borderWidth || style.borderWidth}/>
-                {data.label ? (
-                  <text
-                    fontFamily="Helvetica"
-                    fontSize={10}
-                    textAnchor="middle">
-                    {data.label}
-                  </text>
-                ) : null}
-              </g>
+              <path
+                d={data.path || this.getPath({symbol, size, x, y})}
+                fill={data.color || style.color}
+                key={index}
+                opacity={data.opacity || style.opacity}
+                shapeRendering="optimizeSpeed"
+                stroke={data.borderColor || style.borderColor}
+                strokeWidth={data.borderWidth || style.borderWidth}>
+              </path>
             );
           }}
         </VictoryAnimation>
       );
     });
+  }
 
-    return (<g>{dataPoints}</g>);
+  plotDataPoints() {
+    const xScale = this.getScale("x");
+    const yScale = this.getScale("y");
+    const style = this.getStyles();
+
+    return _.map(this.props.data, (data, index) => {
+      const x = xScale(data.x);
+      const y = yScale(data.y);
+      const size = this.getSize(data);
+      const symbol = data.symbol || this.props.symbol;
+      return (
+        <g>
+          <path
+            d={data.path || this.getPath({symbol, size, x, y})}
+            fill={data.color || style.color}
+            key={index}
+            opacity={data.opacity || style.opacity}
+            shapeRendering="optimizeSpeed"
+            stroke={data.borderColor || style.borderColor}
+            strokeWidth={data.borderWidth || style.borderWidth}>
+          </path>
+          {data.label ? (
+            <text
+              fontFamily="Helvetica"
+              fontSize={10}
+              textAnchor="middle">
+              {data.label}
+            </text>
+          ) : null}
+        </g>
+      );
+    });
   }
 
   render() {
+    const dataElements = this.props.animate ? this.plotAnimatedPoints() : this.plotDataPoints();
     return (
       <g style={this.getStyles()}>
-        {this.plotDataPoints()}
+        {dataElements}
       </g>
     );
   }
 }
 
 VictoryScatter.propTypes = {
+  animate: React.PropTypes.bool,
   style: React.PropTypes.node,
   color: React.PropTypes.string,
   data: React.PropTypes.arrayOf(React.PropTypes.object),
@@ -295,13 +320,6 @@ VictoryScatter.propTypes = {
     "circle", "diamond", "plus", "star", "square", "triangleDown", "triangleUp"
   ]),
   path: React.PropTypes.string,
-  shapeRendering: React.PropTypes.oneOf([
-    "auto",
-    "optimizeSpeed",
-    "crispEdges",
-    "geometricPrecision",
-    "inherit"
-  ]),
   symbolScaleProperty: React.PropTypes.string
 };
 
