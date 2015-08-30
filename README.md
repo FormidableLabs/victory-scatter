@@ -31,7 +31,7 @@ There are several configuration options for Victory Scatter, but if only the `da
 
 All props are optional, but you wont get very far without passing in some data.
 
-### data
+#### data
 
 This prop should be an array of data objects in the following form
 
@@ -47,9 +47,9 @@ This prop should be an array of data objects in the following form
 }
 ```
 
-`x` and `y` data attributes are required to determine the position of each data point.  The additonal attributes described above can be included in each data object if you want to style points individually, or included in the `style` prop to style entire data sets. If data is not provided, mock data will be used as described in [Examples](#Examples).
+`x` and `y` data attributes are required to determine the position of each data point.  The additonal attributes described above can be included in each data object if you want to style points individually, or included in the `style` prop to style entire data sets. If data is not provided, mock data will be used as described above.
 
-**PropType** Array of objects
+**PropTypes** Array of objects
 
 **Default** Calculated mock data
 
@@ -66,7 +66,7 @@ scale: {
 
 Most d3 scale functions are supported. 
 
-**PropType** func, or object with function values for x and y
+**PropTypes** func, or object with function values for x and y
 
 **Default** scale: `() => d3.scale.linear()`
 
@@ -83,7 +83,7 @@ domain: {
 
  If this prop isn't provided Victory Scatter will try to assign a domain based on `data`, or the default domain of the scatter scale. Most d3 scales have default domains of `[0, 1]`. Ordinal, quantile, threshold, and time scales need a specified domain or `data`. Identity scales require the domain and range to be identical, so by default, Victory Scatter will set the default domain equal to the range when these scales are used.  If you are using an identity scale, and you want to specify a custom domain, you will also need to specify an identical custom range, or the custom domain will be overridden.
 
-**PropType** array, or object of array values for x and y
+**PropTypes** array, or object of array values for x and y
 
 **Default** calculated
 
@@ -99,7 +99,7 @@ range: {
 }
 ```
 
-**PropType** array or object of array values for x and y
+**PropTypes** array or object of array values for x and y
 
 **Default** calculated
 
@@ -124,7 +124,7 @@ Victory Scatter is styled inline with [Radium](http://github.com/formidablelabs/
 
 Any styles passed in as props will be merged with this set of default styles.
 
-**PropType** node
+**PropTypes** node
 
 **Default** See above
 
@@ -132,19 +132,19 @@ Any styles passed in as props will be merged with this set of default styles.
 
 This prop determines whether to render Victory Scatter in a `<g>` or `<svg>` element. It is useful to set this prop to "g" if you are composing Victory Scatter with other victory components.
 
-***PropType*** "g" or "svg"
+**PropTypes** "g" or "svg"
 
-***Default*** "svg"
+**Default** `containerElement: "svg"`
 
-### animate
+#### animate
 
 This prop determines whether or not to animate transitions as data changes.  Animation is handled by [Victory Animation](https://github.com/FormidableLabs/victory-animation)
 
-**PropType** bool
+**PropTypes** bool
 
-**Default** false
+**Default** `animate: false`
 
-### symbol
+#### symbol
 
 This prop determines which symbol to use each data point. Supported options are "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp". The rendered symbols look like this:
 
@@ -152,17 +152,17 @@ This prop determines which symbol to use each data point. Supported options are 
 
 **PropTypes** "circle", "diamond", "plus", "square", "star", "triangleDown", or "triangleUp"
 
-**Default** "circle"
+**Default** `symbol: "circle"`
 
-### size
+#### size
 
 This prop determines how large each data point should be.
 
 **PropTypes** number
 
-**Default** 3
+**Default** `size: 3`
 
-### bubbleProperty
+#### bubbleProperty
 
 If the value of this prop matches a key in your data object, the values associated with that key will be used to scale the size of each data point, creating a bubble plot. If a valid `bubbleProperty` value is specified, the symbol plotted for each data point will always be a circle
 
@@ -170,7 +170,7 @@ If the value of this prop matches a key in your data object, the values associat
 
 **Default** undefined
 
-### maxBubbleSize
+#### maxBubbleSize
 
 This prop corresponds to the maximum size of a data point in a bubble plot.  This value is only relevant when a valid `bubbleProperty` is specified. If `maxBubbleSize` is not specified, the maximum size of a data point in a bubble plot will be calculated based on the margin.
 
@@ -182,17 +182,17 @@ This prop corresponds to the maximum size of a data point in a bubble plot.  Thi
 
 This value is how much padding your label should get. If a data object includes a label value, and this value is not provided, label padding will be calculated based on the size of whatever data point the label corresponds to.
 
-**PropType** number
+**PropTypes** number
 
 **Default** calculated
 
-### showLabels
+#### showLabels
 
 This prop is a boolean that determines whether to render labels for data objects that include label values. If you're rendering a large number of data, you might want to set this prop to false, as it will improve animation performance by halving the number of svg nodes that need to be rendered. 
 
-**PropType** bool
+**PropTypes** bool
 
-**Default** true
+**Default** `showLabels: true`
 
 ---
 
@@ -200,7 +200,6 @@ This prop is a boolean that determines whether to render labels for data objects
 
 - Better label rendering
 - shape interpolation
-- Canvas rendering option?!
 - Test Coverage!
 
 ## Development
