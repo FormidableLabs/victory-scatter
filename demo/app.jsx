@@ -1,66 +1,89 @@
 /*global document:false */
+/*global window:false */
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
+import _ from "lodash";
 import {VictoryScatter} from "../src/index";
 import bubbleData from "./bubble-data.js";
+import symbolData from "./symbol-data.js";
 
-// const getData = function () {
-//   const colors =
-//     ["violet", "cornflowerblue", "gold", "orange", "turquoise", "tomato", "greenyellow"];
-//   const symbols = ["circle", "star", "square", "triangleUp", "triangleDown", "diamond", "plus"];
-
-//   return _.map(_.range(200), (index) => {
-//     const scaledIndex = _.floor(index / 29);
-
-//     return {
-//       x: _.random(1200),
-//       y: _.random(600),
-//       symbolScale: _.random(1, 6),
-//       symbol: symbols[scaledIndex],
-//       color: colors[_.random(0, 6)]
-//     };
-//   });
-// };
+const getData = function () {
+  const colors =
+    ["violet", "cornflowerblue", "gold", "orange", "turquoise", "tomato", "greenyellow"];
+  const symbols = ["circle", "star", "square", "triangleUp", "triangleDown", "diamond", "plus"];
+  // symbol: symbols[scaledIndex],
+  return _.map(_.range(100), (index) => {
+    const scaledIndex = _.floor(index % 7);
+    return {
+      x: _.random(1200),
+      y: _.random(600),
+      size: _.random(15) + 3,
+      symbol: symbols[scaledIndex],
+      color: colors[_.random(0, 6)],
+      opacity: _.random(0.3, 1)
+    };
+  });
+};
 
 @Radium
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: this.props.data,
-      height: 600,
-      width: 1200
+      data: this.props.data
     };
   }
-
-  // componentDidMount() {
-  //   window.setInterval(() => {
-  //     this.setState({
-  //       data: getData()
-  //     });
-  //   }, 3000);
-  // }
 
   getStyles() {
     return {
       border: "1px solid #ccc",
-      height: this.state.height,
-      margin: "0 auto",
-      width: this.state.width
+      height: 500,
+      margin: 20,
+      width: 500
     };
+  }
+
+  componentDidMount() {
+    window.setInterval(() => {
+      this.setState({
+        data: getData()
+      });
+    }, 3000);
   }
 
   render() {
     return (
-      <div style={this.getStyles()}>
-        <VictoryScatter
-          bubble={true}
-          maxBubbleRadius={this.state.height / 10}
-          data={this.state.data}
-          height={this.state.height}
-          width={this.state.width}
-          color="cornflowerblue"/>
+      <div>
+        <svg style={this.getStyles()}>
+          <VictoryScatter
+            containerElement="g"
+            animate={true}
+            data={this.state.data}/>
+        </svg>
+
+          <svg style={this.getStyles()}>
+            <VictoryScatter
+              style={{margin: 50, textAnchor: "end", fontSize: 14}}
+              labelPadding={12}
+              containerElement="g"
+              data={symbolData}/>
+        </svg>
+
+        <svg style={this.getStyles()}>
+          <VictoryScatter
+            containerElement="g"
+            style={{color: "blue", opacity: 0.7}}
+            animate={false}
+            bubbleProperty="z"
+            maxBubbleSize={20}
+            showLabels={false}
+            data={bubbleData}/>
+        </svg>
+
+        <svg style={this.getStyles()}>
+          <VictoryScatter
+            containerElement="g"/>
+        </svg>
       </div>
     );
   }
@@ -71,4 +94,4 @@ App.propTypes = {
 };
 
 const content = document.getElementById("content");
-React.render(<App data={bubbleData}/>, content);
+React.render(<App data={getData()}/>, content);
