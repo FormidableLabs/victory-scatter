@@ -4,16 +4,24 @@ import _ from "lodash";
 import d3 from "d3";
 import log from "../log";
 import {VictoryAnimation} from "victory-animation";
+import pathHelpers from "../path-helpers";
 
 @Radium
 class VictoryScatter extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      scale: {
-        x: this.getScale("x"),
-        y: this.getScale("y")
-      }
+    this.state = {};
+    this.state.domain = {
+      x: this.getDomain("x"),
+      y: this.getDomain("y")
+    };
+    this.state.range = {
+      x: this.getRange("x"),
+      y: this.getRange("y")
+    };
+    this.state.scale = {
+      x: this.getScale("x"),
+      y: this.getScale("y")
     };
   }
 
@@ -21,19 +29,22 @@ class VictoryScatter extends React.Component {
     return _.merge({
       borderColor: "transparent",
       borderWidth: 0,
-      color: "blue",
+      color: "#756f6a",
       opacity: 1,
       margin: 20,
       width: 500,
-      height: 200
+      height: 500,
+      fontFamily: "Helvetica",
+      fontSize: 10,
+      textAnchor: "middle"
     }, this.props.style);
   }
 
   getScale(type) {
     const scale = this.props.scale[type] ? this.props.scale[type]().copy() :
       this.props.scale().copy();
-    const range = this.getRange(type);
-    const domain = this.getDomain(type);
+    const range = this.state.range[type];
+    const domain = this.state.domain[type];
     scale.range(range);
     scale.domain(domain);
     // hacky check for identity scale
@@ -80,10 +91,11 @@ class VictoryScatter extends React.Component {
 
   // helper method for getDomain
   _getDomainFromData(type) {
+    const data = this.props.data;
     // if data is given, return the max/min of the data (reversed for y)
     return type === "x" ?
-      [_.min(_.pluck(this.props.data, type)), _.max(_.pluck(this.props.data, type))] :
-      [_.max(_.pluck(this.props.data, type)), _.min(_.pluck(this.props.data, type))];
+      [_.min(_.pluck(data, type)), _.max(_.pluck(data, type))] :
+      [_.max(_.pluck(data, type)), _.min(_.pluck(data, type))];
   }
 
   // helper method for getDomain
@@ -104,189 +116,125 @@ class VictoryScatter extends React.Component {
     return type === "x" ? scaleDomain : scaleDomain.reverse();
   }
 
-  getPath(options) {
-    const symbol = options.symbol;
-    const size = options.size;
-    const x = options.x;
-    const y = options.y;
-
-    switch (symbol) {
-      case "circle":
-        return this._circlePath(x, y, size);
-      case "square":
-        return this._squarePath(x, y, size);
-      case "diamond":
-        return this._diamondPath(x, y, size);
-      case "triangleDown":
-        return this._triangleDownPath(x, y, size);
-      case "triangleUp":
-        return this._triangleUpPath(x, y, size);
-      case "plus":
-        return this._plusPath(x, y, size);
-      case "star":
-        return this._starPath(x, y, size);
+  getSymbol(data) {
+    if (this.props.bubbleProperty) {
+      return "circle";
     }
-  }
-
-  _circlePath(x, y, size) {
-    return "M " + x + "," + y + " " +
-      "m " + -size + ", 0 " +
-      "a " + size + "," + size + " 0 1,0 " + (size * 2) + ",0 " +
-      "a " + size + "," + size + " 0 1,0 " + (-size * 2) + ",0";
-  }
-
-  _squarePath(x, y, size) {
-    return "M " + (x - size) + "," + (y + size) + " " +
-      "L " + (x + size) + "," + (y + size) +
-      "L " + (x + size) + "," + (y - size) +
-      "L " + (x - size) + "," + (y - size) +
-      "z";
-  }
-
-  _diamondPath(x, y, size) {
-    const length = Math.sqrt(2 * (size * size));
-    return "M " + x + "," + (y + length) + " " +
-      "L " + (x + length) + "," + y +
-      "L " + x + "," + (y - length) +
-      "L " + (x - length) + "," + y +
-      "z";
-  }
-
-  _triangleDownPath(x, y, size) {
-    const height = (size / 2 * Math.sqrt(3));
-    return "M " + (x - size) + "," + (y - size) + " " +
-      "L " + (x + size) + "," + (y - size) +
-      "L " + x + "," + (y + height) +
-      "z";
-  }
-
-  _triangleUpPath(x, y, size) {
-    const height = (size / 2 * Math.sqrt(3));
-    return "M " + (x - size) + "," + (y + size) + " " +
-      "L " + (x + size) + "," + (y + size) +
-      "L " + x + "," + (y - height) +
-      "z";
-  }
-
-  _plusPath(x, y, size) {
-    return "M " + (x - size / 2) + "," + (y + size) + " " +
-      "L " + (x + size / 2) + "," + (y + size) +
-      "L " + (x + size / 2) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y + size / 2) +
-      "L " + (x - size / 2) + "," + (y + size / 2) +
-      "z";
-  }
-
-  _starPath(x, y, size) {
-    const angle = Math.PI / 5;
-    const starCoords = _.map(_.range(10), (index) => {
-      const length = index % 2 === 0 ? size : size / 2;
-      return "L " + (length * Math.sin(angle * (index + 1)) + x) + ", " +
-        (length * Math.cos(angle * (index + 1)) + y);
-    });
-    const path = starCoords.toString();
-    return "M " + (x + size) + "," + (y + size) + " " + path + "z";
+    return data.symbol || this.props.symbol;
   }
 
   getSize(data) {
-    const z = this.props.symbolScaleProperty;
+    const z = this.props.bubbleProperty;
     if (data.size) {
-      return data.size;
+      return _.max([data.size, 1]);
     } else if (z && data[z]) {
-      const zMin = _.min(_.pluck(this.props.data, z));
-      const zMax = _.max(_.pluck(this.props.data, z));
-      const maxRadius = _.max(5, this.getStyles.margin / 2);
-      return ((data[z] - zMin) / (zMax - zMin)) * maxRadius;
+      return this.getBubbleSize(data, z);
     } else {
-      return this.props.size;
+      return _.max([this.props.size, 1]);
     }
   }
 
-  plotAnimatedPoints() {
-    const xScale = this.getScale("x");
-    const yScale = this.getScale("y");
+  getBubbleSize(datum, z) {
+    const data = this.props.data;
+    const style = this.getStyles();
+    const zMin = _.min(_.pluck(data, z));
+    const zMax = _.max(_.pluck(data, z));
+    const maxRadius = this.props.maxBubbleSize || _.max([style.margin, 5]);
+    const maxArea = Math.PI * Math.pow(maxRadius, 2);
+    const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
+    const radius = Math.sqrt(area / Math.PI);
+    return _.max([radius, 1]);
+  }
 
-    return _.map(this.props.data, (dataPoint, index) => {
-      const style = this.getStyles();
-      return (
-        <VictoryAnimation data={dataPoint} key={index}>
-          {(data) => {
-            const x = xScale(data.x);
-            const y = yScale(data.y);
-            const size = this.getSize(data);
-            const symbol = data.symbol || this.props.symbol;
-            return (
-              <path
-                d={data.path || this.getPath({symbol, size, x, y})}
-                fill={data.color || style.color}
-                key={index}
-                opacity={data.opacity || style.opacity}
-                shapeRendering="optimizeSpeed"
-                stroke={data.borderColor || style.borderColor}
-                strokeWidth={data.borderWidth || style.borderWidth}>
-              </path>
-            );
-          }}
-        </VictoryAnimation>
-      );
+  getMockData() {
+    const samples = 20;
+    const domain = this.state.domain;
+    return _.map(_.range(samples), (index) => {
+      return {
+        x: (_.max(domain.x) - _.min(domain.x)) / samples * (index + 1),
+        y: (_.max(domain.y) - _.min(domain.y)) / samples * (index + 1)
+      };
     });
   }
 
-  plotDataPoints() {
-    const xScale = this.getScale("x");
-    const yScale = this.getScale("y");
-    const style = this.getStyles();
-
-    return _.map(this.props.data, (data, index) => {
-      const x = xScale(data.x);
-      const y = yScale(data.y);
-      const size = this.getSize(data);
-      const symbol = data.symbol || this.props.symbol;
+  getPathElement(data, style, index) {
+    const pathFunctions = {
+      circle: pathHelpers.circle,
+      square: pathHelpers.square,
+      diamond: pathHelpers.diamond,
+      triangleDown: pathHelpers.triangleDown,
+      triangleUp: pathHelpers.triangleUp,
+      plus: pathHelpers.plus,
+      star: pathHelpers.star
+    };
+    const x = this.state.scale.x.call(this, data.x);
+    // svg coordinates start from the top left instead of the bottom left
+    const y = style.height - this.state.scale.y.call(this, data.y);
+    const size = this.getSize(data);
+    const symbol = this.getSymbol(data);
+    const path = pathFunctions[symbol].call(this, x, y, size);
+    const pathElement = (
+      <path
+        d={path}
+        fill={data.color || style.color}
+        key={index}
+        opacity={data.opacity || style.opacity}
+        shapeRendering="optimizeSpeed"
+        stroke={data.borderColor || style.borderColor}
+        strokeWidth={data.borderWidth || style.borderWidth}>
+      </path>
+    );
+    if (data.label && this.props.showLabels) {
       return (
         <g>
-          <path
-            d={data.path || this.getPath({symbol, size, x, y})}
-            fill={data.color || style.color}
-            key={index}
-            opacity={data.opacity || style.opacity}
-            shapeRendering="optimizeSpeed"
-            stroke={data.borderColor || style.borderColor}
-            strokeWidth={data.borderWidth || style.borderWidth}>
-          </path>
-          {data.label ? (
-            <text
-              fontFamily="Helvetica"
-              fontSize={10}
-              textAnchor="middle">
-              {data.label}
-            </text>
-          ) : null}
+          {pathElement}
+          <text
+            x={x}
+            y={y}
+            dy={-this.props.labelPadding || size * -1.25}
+            key={"label-" + index}
+            fontFamily={style.fontFamily}
+            fontSize={style.fontSize}
+            textAnchor={style.textAnchor}>
+            {data.label}
+          </text>
         </g>
       );
+    }
+    return pathElement;
+  }
+
+  plotDataPoints() {
+    const data = this.props.data || this.getMockData();
+    return _.map(data, (dataPoint, index) => {
+      const style = this.getStyles();
+      if (this.props.animate) {
+        return (
+          <VictoryAnimation data={dataPoint} key={index}>
+            {(datum) => {
+              return this.getPathElement(datum, style, index);
+            }}
+          </VictoryAnimation>
+        );
+      } else {
+        return this.getPathElement(dataPoint, style, index);
+      }
     });
   }
 
   render() {
-    const dataElements = this.props.animate ? this.plotAnimatedPoints() : this.plotDataPoints();
+    if (this.props.containerElement === "svg") {
+      return (
+        <svg style={this.getStyles()}>{this.plotDataPoints()}</svg>
+      );
+    }
     return (
-      <g style={this.getStyles()}>
-        {dataElements}
-      </g>
+      <g style={this.getStyles()}>{this.plotDataPoints()}</g>
     );
   }
 }
 
 VictoryScatter.propTypes = {
-  animate: React.PropTypes.bool,
-  style: React.PropTypes.node,
-  color: React.PropTypes.string,
   data: React.PropTypes.arrayOf(React.PropTypes.object),
   domain: React.PropTypes.oneOfType([
     React.PropTypes.array,
@@ -315,19 +263,27 @@ VictoryScatter.propTypes = {
       })
     )
   ]),
+  animate: React.PropTypes.bool,
+  style: React.PropTypes.node,
   size: React.PropTypes.number,
   symbol: React.PropTypes.oneOf([
-    "circle", "diamond", "plus", "star", "square", "triangleDown", "triangleUp"
+    "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
   ]),
-  path: React.PropTypes.string,
-  symbolScaleProperty: React.PropTypes.string
+  labelPadding: React.PropTypes.number,
+  bubbleProperty: React.PropTypes.string,
+  maxBubbleSize: React.PropTypes.number,
+  showLabels: React.PropTypes.bool,
+  containerElement: React.PropTypes.oneOf(["g", "svg"])
+
 };
 
 VictoryScatter.defaultProps = {
+  animate: false,
   size: 3,
   symbol: "circle",
-  shapeRendering: "auto",
-  scale: () => d3.scale.linear()
+  scale: () => d3.scale.linear(),
+  showLabels: true,
+  containerElement: "svg"
 };
 
 export default VictoryScatter;
