@@ -15,7 +15,7 @@ const getData = function () {
   return _.map(_.range(100), (index) => {
     const scaledIndex = _.floor(index % 7);
     return {
-      x: _.random(1200),
+      x: _.random(600),
       y: _.random(600),
       size: _.random(15) + 3,
       symbol: symbols[scaledIndex],
@@ -57,6 +57,7 @@ class App extends React.Component {
         <svg style={this.getStyles()}>
           <VictoryScatter
             containerElement="g"
+            domain={[0, 600]}
             animate={true}
             data={this.state.data}/>
         </svg>
