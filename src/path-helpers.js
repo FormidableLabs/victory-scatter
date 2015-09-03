@@ -9,6 +9,7 @@ module.exports = {
   },
 
   square(x, y, size) {
+    size -= 1;
     return "M " + (x - size) + "," + (y + size) + " " +
       "L " + (x + size) + "," + (y + size) +
       "L " + (x + size) + "," + (y - size) +
@@ -17,6 +18,7 @@ module.exports = {
   },
 
   diamond(x, y, size) {
+    size -= 1;
     const length = Math.sqrt(2 * (size * size));
     return "M " + x + "," + (y + length) + " " +
       "L " + (x + length) + "," + y +
@@ -42,23 +44,24 @@ module.exports = {
   },
 
   plus(x, y, size) {
-    return "M " + (x - size / 2) + "," + (y + size) + " " +
-      "L " + (x + size / 2) + "," + (y + size) +
-      "L " + (x + size / 2) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y + size / 2) +
-      "L " + (x - size / 2) + "," + (y + size / 2) +
+    size += 1;
+    return "M " + (x - size / 2.5) + "," + (y + size) + " " +
+      "L " + (x + size / 2.5) + "," + (y + size) +
+      "L " + (x + size / 2.5) + "," + (y + size / 2.5) +
+      "L " + (x + size) + "," + (y + size / 2.5) +
+      "L " + (x + size) + "," + (y - size / 2.5) +
+      "L " + (x + size / 2.5) + "," + (y - size / 2.5) +
+      "L " + (x + size / 2.5) + "," + (y - size) +
+      "L " + (x - size / 2.5) + "," + (y - size) +
+      "L " + (x - size / 2.5) + "," + (y - size / 2.5) +
+      "L " + (x - size) + "," + (y - size / 2.5) +
+      "L " + (x - size) + "," + (y + size / 2.5) +
+      "L " + (x - size / 2.5) + "," + (y + size / 2.5) +
       "z";
   },
 
   star(x, y, size) {
-    const baseSize = 1.2 * size;
+    const baseSize = 1.2 * (size + 1);
     const angle = Math.PI / 5;
     const starCoords = _.map(_.range(10), (index) => {
       const length = index % 2 === 0 ? baseSize : baseSize / 2;

@@ -1,13 +1,13 @@
 [![Travis Status][trav_img]][trav_site]
 
-Starter Victory Component
+Victory Scatter
 =========================
 
-Victory scatter creates a scatter of points from data. Scatter is a composable component, so it does not include an axis.  Check out Victory Chart for easy to use scatter plots and more.
+Victory Scatter creates a scatter of points from data. Scatter is a composable component, so it does not include an axis.  Check out Victory Chart for easy to use scatter plots and more.
 
 ## Examples
 
-Victory Scatter is written to be highly configurable, but it also includes a set of sensible defaults and fallbacks. If no props are provided, 
+Victory Scatter is written to be highly configurable, but it also includes a set of sensible defaults and fallbacks. If no props are provided,
 
 ```
  <VictoryScatter/>
@@ -55,7 +55,7 @@ This prop should be an array of data objects in the following form
 
 #### scale
 
-This prop determines what scale your scatter component should use. This prop should return a function, or an object in the form: 
+This prop determines what scale your scatter component should use. This prop should return a function, or an object in the form:
 
 ```
 scale: {
@@ -64,7 +64,7 @@ scale: {
 }
 ```
 
-Most d3 scale functions are supported. 
+Most d3 scale functions are supported.
 
 **PropTypes** func, or object with function values for x and y
 
@@ -188,7 +188,7 @@ This value is how much padding your label should get. If a data object includes 
 
 #### showLabels
 
-This prop is a boolean that determines whether to render labels for data objects that include label values. If you're rendering a large number of data, you might want to set this prop to false, as it will improve animation performance by halving the number of svg nodes that need to be rendered. 
+This prop is a boolean that determines whether to render labels for data objects that include label values. If you're rendering a large number of data, you might want to set this prop to false, as it will improve animation performance by halving the number of svg nodes that need to be rendered.
 
 **PropTypes** bool
 
