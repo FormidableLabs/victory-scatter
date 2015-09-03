@@ -209,7 +209,9 @@ class VictoryScatter extends React.Component {
             return (
               <VScatter
                 {...props}
+                animate={this.props.animate}
                 scale={this.props.scale}
+                showLabels={this.props.showLabels}
                 containerElement={this.props.containerElement}/>
             );
           }}
