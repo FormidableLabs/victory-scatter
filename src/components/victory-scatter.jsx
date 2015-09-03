@@ -6,7 +6,6 @@ import log from "../log";
 import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
-@Radium
 class VScatter extends React.Component {
   constructor(props) {
     super(props);
@@ -196,6 +195,7 @@ class VScatter extends React.Component {
   }
 }
 
+@Radium
 class VictoryScatter extends React.Component {
   constructor(props) {
     super(props);
