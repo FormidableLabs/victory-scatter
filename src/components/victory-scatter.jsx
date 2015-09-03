@@ -7,22 +7,9 @@ import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
 @Radium
-class VictoryScatter extends React.Component {
+class VScatter extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
-    this.state.domain = {
-      x: this.getDomain("x"),
-      y: this.getDomain("y")
-    };
-    this.state.range = {
-      x: this.getRange("x"),
-      y: this.getRange("y")
-    };
-    this.state.scale = {
-      x: this.getScale("x"),
-      y: this.getScale("y")
-    };
   }
 
   getStyles() {
@@ -43,8 +30,8 @@ class VictoryScatter extends React.Component {
   getScale(type) {
     const scale = this.props.scale[type] ? this.props.scale[type]().copy() :
       this.props.scale().copy();
-    const range = this.state.range[type];
-    const domain = this.state.domain[type];
+    const range = this.getRange(type);
+    const domain = this.getDomain(type);
     scale.range(range);
     scale.domain(domain);
     // hacky check for identity scale
@@ -71,31 +58,15 @@ class VictoryScatter extends React.Component {
 
   getDomain(type) {
     if (this.props.domain) {
-      return this._getDomainFromProps(type);
+      return this.props.domain[type] || this.props.domain;
     } else if (this.props.data) {
-      return this._getDomainFromData(type);
+      return [
+        _.min(_.pluck(this.props.data, type)),
+        _.max(_.pluck(this.props.data, type))
+      ];
     } else {
       return this._getDomainFromScale(type);
     }
-  }
-
-  // helper method for getDomain
-  _getDomainFromProps(type) {
-    if (this.props.domain[type]) {
-      // if the domain for this type is given, return it
-      return this.props.domain[type];
-    }
-    // if the domain is given without the type specified, return the domain (reversed for y)
-    return type === "x" ? this.props.domain : this.props.domain.concat().reverse();
-  }
-
-  // helper method for getDomain
-  _getDomainFromData(type) {
-    const data = this.props.data;
-    // if data is given, return the max/min of the data (reversed for y)
-    return type === "x" ?
-      [_.min(_.pluck(data, type)), _.max(_.pluck(data, type))] :
-      [_.max(_.pluck(data, type)), _.min(_.pluck(data, type))];
   }
 
   // helper method for getDomain
@@ -112,8 +83,7 @@ class VictoryScatter extends React.Component {
     } else if (scaleDomain.length === 1) {
       log.warn("please specify a domain or data when using a threshold scale");
     }
-    // return the default domain for the scale (reversed for y)
-    return type === "x" ? scaleDomain : scaleDomain.reverse();
+    return scaleDomain;
   }
 
   getSymbol(data) {
@@ -148,7 +118,10 @@ class VictoryScatter extends React.Component {
 
   getMockData() {
     const samples = 20;
-    const domain = this.state.domain;
+    const domain = {
+      x: this.getDomain("x"),
+      y: this.getDomain("y")
+    };
     return _.map(_.range(samples), (index) => {
       return {
         x: (_.max(domain.x) - _.min(domain.x)) / samples * (index + 1),
@@ -167,9 +140,8 @@ class VictoryScatter extends React.Component {
       plus: pathHelpers.plus,
       star: pathHelpers.star
     };
-    const x = this.state.scale.x.call(this, data.x);
-    // svg coordinates start from the top left instead of the bottom left
-    const y = style.height - this.state.scale.y.call(this, data.y);
+    const x = this.getScale("x").call(this, data.x);
+    const y = this.getScale("y").call(this, data.y);
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, x, y, size);
@@ -208,17 +180,7 @@ class VictoryScatter extends React.Component {
     const data = this.props.data || this.getMockData();
     return _.map(data, (dataPoint, index) => {
       const style = this.getStyles();
-      if (this.props.animate) {
-        return (
-          <VictoryAnimation data={dataPoint} key={index}>
-            {(datum) => {
-              return this.getPathElement(datum, style, index);
-            }}
-          </VictoryAnimation>
-        );
-      } else {
-        return this.getPathElement(dataPoint, style, index);
-      }
+      return this.getPathElement(dataPoint, style, index);
     });
   }
 
@@ -234,34 +196,52 @@ class VictoryScatter extends React.Component {
   }
 }
 
-VictoryScatter.propTypes = {
+class VictoryScatter extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    if (this.props.animate) {
+      return (
+        <VictoryAnimation data={this.props}>
+          {(props) => {
+            return (
+              <VScatter
+                {...props}
+                scale={this.props.scale}
+                containerElement={this.props.containerElement}/>
+            );
+          }}
+        </VictoryAnimation>
+      );
+    }
+    return (<VScatter {...this.props}/>);
+  }
+}
+
+const propTypes = {
   data: React.PropTypes.arrayOf(React.PropTypes.object),
   domain: React.PropTypes.oneOfType([
     React.PropTypes.array,
-    React.PropTypes.objectOf(
-      React.PropTypes.shape({
-        x: React.PropTypes.array,
-        y: React.PropTypes.array
-      })
-    )
+    React.PropTypes.shape({
+      x: React.PropTypes.array,
+      y: React.PropTypes.array
+    })
   ]),
   range: React.PropTypes.oneOfType([
     React.PropTypes.array,
-    React.PropTypes.objectOf(
-      React.PropTypes.shape({
-        x: React.PropTypes.array,
-        y: React.PropTypes.array
-      })
-    )
+    React.PropTypes.shape({
+      x: React.PropTypes.array,
+      y: React.PropTypes.array
+    })
   ]),
   scale: React.PropTypes.oneOfType([
     React.PropTypes.func,
-    React.PropTypes.objectOf(
-      React.PropTypes.shape({
-        x: React.PropTypes.func,
-        y: React.PropTypes.func
-      })
-    )
+    React.PropTypes.shape({
+      x: React.PropTypes.func,
+      y: React.PropTypes.func
+    })
   ]),
   animate: React.PropTypes.bool,
   style: React.PropTypes.node,
@@ -277,7 +257,7 @@ VictoryScatter.propTypes = {
 
 };
 
-VictoryScatter.defaultProps = {
+const defaultProps = {
   animate: false,
   size: 3,
   symbol: "circle",
@@ -285,5 +265,10 @@ VictoryScatter.defaultProps = {
   showLabels: true,
   containerElement: "svg"
 };
+
+VictoryScatter.propTypes = propTypes;
+VictoryScatter.defaultProps = defaultProps;
+VScatter.propTypes = propTypes;
+VScatter.defaultProps = defaultProps;
 
 export default VictoryScatter;
