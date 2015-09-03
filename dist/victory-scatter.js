@@ -70,6 +70,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 	
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
@@ -106,29 +108,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _pathHelpers2 = _interopRequireDefault(_pathHelpers);
 	
-	var VictoryScatter = (function (_React$Component) {
-	  _inherits(VictoryScatter, _React$Component);
+	var VScatter = (function (_React$Component) {
+	  _inherits(VScatter, _React$Component);
 	
-	  function VictoryScatter(props) {
-	    _classCallCheck(this, _VictoryScatter);
+	  function VScatter(props) {
+	    _classCallCheck(this, VScatter);
 	
-	    _get(Object.getPrototypeOf(_VictoryScatter.prototype), "constructor", this).call(this, props);
-	    this.state = {};
-	    this.state.domain = {
-	      x: this.getDomain("x"),
-	      y: this.getDomain("y")
-	    };
-	    this.state.range = {
-	      x: this.getRange("x"),
-	      y: this.getRange("y")
-	    };
-	    this.state.scale = {
-	      x: this.getScale("x"),
-	      y: this.getScale("y")
-	    };
+	    _get(Object.getPrototypeOf(VScatter.prototype), "constructor", this).call(this, props);
 	  }
 	
-	  _createClass(VictoryScatter, [{
+	  _createClass(VScatter, [{
 	    key: "getStyles",
 	    value: function getStyles() {
 	      return _lodash2["default"].merge({
@@ -148,8 +137,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "getScale",
 	    value: function getScale(type) {
 	      var scale = this.props.scale[type] ? this.props.scale[type]().copy() : this.props.scale().copy();
-	      var range = this.state.range[type];
-	      var domain = this.state.domain[type];
+	      var range = this.getRange(type);
+	      var domain = this.getDomain(type);
 	      scale.range(range);
 	      scale.domain(domain);
 	      // hacky check for identity scale
@@ -175,33 +164,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "getDomain",
 	    value: function getDomain(type) {
 	      if (this.props.domain) {
-	        return this._getDomainFromProps(type);
+	        return this.props.domain[type] || this.props.domain;
 	      } else if (this.props.data) {
-	        return this._getDomainFromData(type);
+	        return [_lodash2["default"].min(_lodash2["default"].pluck(this.props.data, type)), _lodash2["default"].max(_lodash2["default"].pluck(this.props.data, type))];
 	      } else {
 	        return this._getDomainFromScale(type);
 	      }
-	    }
-	
-	    // helper method for getDomain
-	  }, {
-	    key: "_getDomainFromProps",
-	    value: function _getDomainFromProps(type) {
-	      if (this.props.domain[type]) {
-	        // if the domain for this type is given, return it
-	        return this.props.domain[type];
-	      }
-	      // if the domain is given without the type specified, return the domain (reversed for y)
-	      return type === "x" ? this.props.domain : this.props.domain.concat().reverse();
-	    }
-	
-	    // helper method for getDomain
-	  }, {
-	    key: "_getDomainFromData",
-	    value: function _getDomainFromData(type) {
-	      var data = this.props.data;
-	      // if data is given, return the max/min of the data (reversed for y)
-	      return type === "x" ? [_lodash2["default"].min(_lodash2["default"].pluck(data, type)), _lodash2["default"].max(_lodash2["default"].pluck(data, type))] : [_lodash2["default"].max(_lodash2["default"].pluck(data, type)), _lodash2["default"].min(_lodash2["default"].pluck(data, type))];
 	    }
 	
 	    // helper method for getDomain
@@ -219,8 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else if (scaleDomain.length === 1) {
 	        _log2["default"].warn("please specify a domain or data when using a threshold scale");
 	      }
-	      // return the default domain for the scale (reversed for y)
-	      return type === "x" ? scaleDomain : scaleDomain.reverse();
+	      return scaleDomain;
 	    }
 	  }, {
 	    key: "getSymbol",
@@ -259,7 +226,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "getMockData",
 	    value: function getMockData() {
 	      var samples = 20;
-	      var domain = this.state.domain;
+	      var domain = {
+	        x: this.getDomain("x"),
+	        y: this.getDomain("y")
+	      };
 	      return _lodash2["default"].map(_lodash2["default"].range(samples), function (index) {
 	        return {
 	          x: (_lodash2["default"].max(domain.x) - _lodash2["default"].min(domain.x)) / samples * (index + 1),
@@ -279,9 +249,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        plus: _pathHelpers2["default"].plus,
 	        star: _pathHelpers2["default"].star
 	      };
-	      var x = this.state.scale.x.call(this, data.x);
-	      // svg coordinates start from the top left instead of the bottom left
-	      var y = style.height - this.state.scale.y.call(this, data.y);
+	      var x = this.getScale("x").call(this, data.x);
+	      var y = this.getScale("y").call(this, data.y);
 	      var size = this.getSize(data);
 	      var symbol = this.getSymbol(data);
 	      var path = pathFunctions[symbol].call(this, x, y, size);
@@ -322,17 +291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var data = this.props.data || this.getMockData();
 	      return _lodash2["default"].map(data, function (dataPoint, index) {
 	        var style = _this.getStyles();
-	        if (_this.props.animate) {
-	          return _react2["default"].createElement(
-	            _victoryAnimation.VictoryAnimation,
-	            { data: dataPoint, key: index },
-	            function (datum) {
-	              return _this.getPathElement(datum, style, index);
-	            }
-	          );
-	        } else {
-	          return _this.getPathElement(dataPoint, style, index);
-	        }
+	        return _this.getPathElement(dataPoint, style, index);
 	      });
 	    }
 	  }, {
@@ -353,25 +312,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }]);
 	
+	  return VScatter;
+	})(_react2["default"].Component);
+	
+	var VictoryScatter = (function (_React$Component2) {
+	  _inherits(VictoryScatter, _React$Component2);
+	
+	  function VictoryScatter(props) {
+	    _classCallCheck(this, _VictoryScatter);
+	
+	    _get(Object.getPrototypeOf(_VictoryScatter.prototype), "constructor", this).call(this, props);
+	  }
+	
+	  _createClass(VictoryScatter, [{
+	    key: "render",
+	    value: function render() {
+	      var _this2 = this;
+	
+	      if (this.props.animate) {
+	        return _react2["default"].createElement(
+	          _victoryAnimation.VictoryAnimation,
+	          { data: this.props },
+	          function (props) {
+	            return _react2["default"].createElement(VScatter, _extends({}, props, {
+	              animate: _this2.props.animate,
+	              scale: _this2.props.scale,
+	              showLabels: _this2.props.showLabels,
+	              containerElement: _this2.props.containerElement }));
+	          }
+	        );
+	      }
+	      return _react2["default"].createElement(VScatter, this.props);
+	    }
+	  }]);
+	
 	  var _VictoryScatter = VictoryScatter;
 	  VictoryScatter = (0, _radium2["default"])(VictoryScatter) || VictoryScatter;
 	  return VictoryScatter;
 	})(_react2["default"].Component);
 	
-	VictoryScatter.propTypes = {
+	var propTypes = {
 	  data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.object),
-	  domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.objectOf(_react2["default"].PropTypes.shape({
+	  domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.array,
 	    y: _react2["default"].PropTypes.array
-	  }))]),
-	  range: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.objectOf(_react2["default"].PropTypes.shape({
+	  })]),
+	  range: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.array,
 	    y: _react2["default"].PropTypes.array
-	  }))]),
-	  scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.objectOf(_react2["default"].PropTypes.shape({
+	  })]),
+	  scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.func,
 	    y: _react2["default"].PropTypes.func
-	  }))]),
+	  })]),
 	  animate: _react2["default"].PropTypes.bool,
 	  style: _react2["default"].PropTypes.node,
 	  size: _react2["default"].PropTypes.number,
@@ -384,7 +377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	};
 	
-	VictoryScatter.defaultProps = {
+	var defaultProps = {
 	  animate: false,
 	  size: 3,
 	  symbol: "circle",
@@ -394,6 +387,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  showLabels: true,
 	  containerElement: "svg"
 	};
+	
+	VictoryScatter.propTypes = propTypes;
+	VictoryScatter.defaultProps = defaultProps;
+	VScatter.propTypes = propTypes;
+	VScatter.defaultProps = defaultProps;
 	
 	exports["default"] = VictoryScatter;
 	module.exports = exports["default"];
