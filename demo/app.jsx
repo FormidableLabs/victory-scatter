@@ -62,12 +62,12 @@ class App extends React.Component {
             data={this.state.data}/>
         </svg>
 
-          <svg style={this.getStyles()}>
-            <VictoryScatter
-              style={{margin: 50, textAnchor: "end", fontSize: 14}}
-              labelPadding={12}
-              containerElement="g"
-              data={symbolData}/>
+        <svg style={this.getStyles()}>
+          <VictoryScatter
+            style={{margin: 50, textAnchor: "end", fontSize: 14}}
+            labelPadding={12}
+            containerElement="g"
+            data={symbolData}/>
         </svg>
 
         <svg style={this.getStyles()}>

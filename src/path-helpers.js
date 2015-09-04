@@ -1,4 +1,4 @@
-const _ = require("lodash");
+import _ from "lodash";
 
 module.exports = {
   circle(x, y, size) {
@@ -9,15 +9,17 @@ module.exports = {
   },
 
   square(x, y, size) {
-    return "M " + (x - size) + "," + (y + size) + " " +
-      "L " + (x + size) + "," + (y + size) +
-      "L " + (x + size) + "," + (y - size) +
-      "L " + (x - size) + "," + (y - size) +
+    const baseSize = 0.87 * size;
+    return "M " + (x - baseSize) + "," + (y + baseSize) + " " +
+      "L " + (x + baseSize) + "," + (y + baseSize) +
+      "L " + (x + baseSize) + "," + (y - baseSize) +
+      "L " + (x - baseSize) + "," + (y - baseSize) +
       "z";
   },
 
   diamond(x, y, size) {
-    const length = Math.sqrt(2 * (size * size));
+    const baseSize = 0.87 * size;
+    const length = Math.sqrt(2 * (baseSize * baseSize));
     return "M " + x + "," + (y + length) + " " +
       "L " + (x + length) + "," + y +
       "L " + x + "," + (y - length) +
@@ -42,30 +44,30 @@ module.exports = {
   },
 
   plus(x, y, size) {
-    return "M " + (x - size / 2) + "," + (y + size) + " " +
-      "L " + (x + size / 2) + "," + (y + size) +
-      "L " + (x + size / 2) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y + size / 2) +
-      "L " + (x + size) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size / 2) +
-      "L " + (x + size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size) +
-      "L " + (x - size / 2) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y - size / 2) +
-      "L " + (x - size) + "," + (y + size / 2) +
-      "L " + (x - size / 2) + "," + (y + size / 2) +
+    const baseSize = 1.1 * size;
+    return "M " + (x - baseSize / 2.5) + "," + (y + baseSize) + " " +
+      "L " + (x + baseSize / 2.5) + "," + (y + baseSize) +
+      "L " + (x + baseSize / 2.5) + "," + (y + baseSize / 2.5) +
+      "L " + (x + baseSize) + "," + (y + baseSize / 2.5) +
+      "L " + (x + baseSize) + "," + (y - baseSize / 2.5) +
+      "L " + (x + baseSize / 2.5) + "," + (y - baseSize / 2.5) +
+      "L " + (x + baseSize / 2.5) + "," + (y - baseSize) +
+      "L " + (x - baseSize / 2.5) + "," + (y - baseSize) +
+      "L " + (x - baseSize / 2.5) + "," + (y - baseSize / 2.5) +
+      "L " + (x - baseSize) + "," + (y - baseSize / 2.5) +
+      "L " + (x - baseSize) + "," + (y + baseSize / 2.5) +
+      "L " + (x - baseSize / 2.5) + "," + (y + baseSize / 2.5) +
       "z";
   },
 
   star(x, y, size) {
-    const baseSize = 1.2 * size;
+    const baseSize = 1.35 * size;
     const angle = Math.PI / 5;
     const starCoords = _.map(_.range(10), (index) => {
       const length = index % 2 === 0 ? baseSize : baseSize / 2;
-      return "L " + (length * Math.sin(angle * (index + 1)) + x) + ", " +
+      return (length * Math.sin(angle * (index + 1)) + x) + "," +
         (length * Math.cos(angle * (index + 1)) + y);
     });
-    const path = starCoords.toString();
-    return "M " + (x + baseSize) + "," + (y + baseSize) + " " + path + "z";
+    return "M" + starCoords.join("L") + "z";
   }
 };

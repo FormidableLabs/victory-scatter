@@ -63,9 +63,8 @@ class VScatter extends React.Component {
         _.min(_.pluck(this.props.data, type)),
         _.max(_.pluck(this.props.data, type))
       ];
-    } else {
-      return this._getDomainFromScale(type);
     }
+    return this._getDomainFromScale(type);
   }
 
   // helper method for getDomain
@@ -157,13 +156,12 @@ class VScatter extends React.Component {
     );
     if (data.label && this.props.showLabels) {
       return (
-        <g>
+        <g key={"label-" + index}>
           {pathElement}
           <text
             x={x}
             y={y}
             dy={-this.props.labelPadding || size * -1.25}
-            key={"label-" + index}
             fontFamily={style.fontFamily}
             fontSize={style.fontSize}
             textAnchor={style.textAnchor}>
@@ -256,7 +254,6 @@ const propTypes = {
   maxBubbleSize: React.PropTypes.number,
   showLabels: React.PropTypes.bool,
   containerElement: React.PropTypes.oneOf(["g", "svg"])
-
 };
 
 const defaultProps = {
