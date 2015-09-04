@@ -1,4 +1,4 @@
-const _ = require("lodash");
+import _ from "lodash";
 
 module.exports = {
   circle(x, y, size) {
@@ -68,7 +68,6 @@ module.exports = {
       return (length * Math.sin(angle * (index + 1)) + x) + "," +
         (length * Math.cos(angle * (index + 1)) + y);
     });
-    const path = starCoords.join("L");
-    return "M" + path + "z";
+    return "M" + starCoords.join("L") + "z";
   }
 };
