@@ -9,9 +9,14 @@ import pathHelpers from "../path-helpers";
 class VScatter extends React.Component {
   constructor(props) {
     super(props);
+    this.getCalculatedValues(props);
   }
 
-  getStyles() {
+  componentWillReceiveProps(nextProps) {
+    this.getCalculatedValues(nextProps);
+  }
+
+  getStyles(props) {
     return _.merge({
       borderColor: "transparent",
       borderWidth: 0,
@@ -23,14 +28,30 @@ class VScatter extends React.Component {
       fontFamily: "Helvetica",
       fontSize: 10,
       textAnchor: "middle"
-    }, this.props.style);
+    }, props.style);
   }
 
-  getScale(type) {
-    const scale = this.props.scale[type] ? this.props.scale[type]().copy() :
-      this.props.scale().copy();
-    const range = this.getRange(type);
-    const domain = this.getDomain(type);
+  getCalculatedValues(props) {
+    this.style = this.getStyles(props);
+    this.range = {
+      x: this.getRange(props, "x"),
+      y: this.getRange(props, "y")
+    };
+    this.domain = {
+      x: this.getDomain(props, "x"),
+      y: this.getDomain(props, "y")
+    };
+    this.scale = {
+      x: this.getScale(props, "x"),
+      y: this.getScale(props, "y")
+    };
+  }
+
+  getScale(props, axis) {
+    const scale = props.scale[axis] ? props.scale[axis]().copy() :
+      props.scale().copy();
+    const range = this.range[axis];
+    const domain = this.domain[axis];
     scale.range(range);
     scale.domain(domain);
     // hacky check for identity scale
@@ -44,34 +65,33 @@ class VScatter extends React.Component {
     return scale;
   }
 
-  getRange(type) {
-    if (this.props.range) {
-      return this.props.range[type] ? this.props.range[type] : this.props.range;
+  getRange(props, axis) {
+    if (props.range) {
+      return props.range[axis] ? props.range[axis] : props.range;
     }
     // if the range is not given in props, calculate it from width, height and margin
-    const style = this.getStyles();
-    return type === "x" ?
-      [style.margin, style.width - style.margin] :
-      [style.height - style.margin, style.margin];
+    return axis === "x" ?
+      [this.style.margin, this.style.width - this.style.margin] :
+      [this.style.height - this.style.margin, this.style.margin];
   }
 
-  getDomain(type) {
-    if (this.props.domain) {
-      return this.props.domain[type] || this.props.domain;
-    } else if (this.props.data) {
+  getDomain(props, axis) {
+    if (props.domain) {
+      return props.domain[axis] || props.domain;
+    } else if (props.data) {
       return [
-        _.min(_.pluck(this.props.data, type)),
-        _.max(_.pluck(this.props.data, type))
+        _.min(_.pluck(props.data, axis)),
+        _.max(_.pluck(props.data, axis))
       ];
     }
-    return this._getDomainFromScale(type);
+    return this._getDomainFromScale(props, axis);
   }
 
   // helper method for getDomain
-  _getDomainFromScale(type) {
+  _getDomainFromScale(props, axis) {
     // The scale will never be undefined due to default props
-    const scaleDomain = this.props.scale[type] ? this.props.scale[type]().domain() :
-      this.props.scale().domain();
+    const scaleDomain = props.scale[axis] ? props.scale[axis]().domain() :
+      props.scale().domain();
 
     // Warn when particular types of scales need more information to produce meaningful lines
     if (_.isDate(scaleDomain[0])) {
@@ -104,10 +124,9 @@ class VScatter extends React.Component {
 
   getBubbleSize(datum, z) {
     const data = this.props.data;
-    const style = this.getStyles();
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || _.max([style.margin, 5]);
+    const maxRadius = this.props.maxBubbleSize || _.max([this.style.margin, 5]);
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
@@ -117,8 +136,8 @@ class VScatter extends React.Component {
   getMockData() {
     const samples = 20;
     const domain = {
-      x: this.getDomain("x"),
-      y: this.getDomain("y")
+      x: this.domain.x,
+      y: this.domain.y
     };
     return _.map(_.range(samples), (index) => {
       return {
@@ -138,8 +157,8 @@ class VScatter extends React.Component {
       plus: pathHelpers.plus,
       star: pathHelpers.star
     };
-    const x = this.getScale("x").call(this, data.x);
-    const y = this.getScale("y").call(this, data.y);
+    const x = this.scale.x.call(this, data.x);
+    const y = this.scale.y.call(this, data.y);
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, x, y, size);
@@ -176,19 +195,18 @@ class VScatter extends React.Component {
   plotDataPoints() {
     const data = this.props.data || this.getMockData();
     return _.map(data, (dataPoint, index) => {
-      const style = this.getStyles();
-      return this.getPathElement(dataPoint, style, index);
+      return this.getPathElement(dataPoint, this.style, index);
     });
   }
 
   render() {
     if (this.props.containerElement === "svg") {
       return (
-        <svg style={this.getStyles()}>{this.plotDataPoints()}</svg>
+        <svg style={this.style}>{this.plotDataPoints()}</svg>
       );
     }
     return (
-      <g style={this.getStyles()}>{this.plotDataPoints()}</g>
+      <g style={this.style}>{this.plotDataPoints()}</g>
     );
   }
 }
