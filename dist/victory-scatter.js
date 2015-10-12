@@ -115,11 +115,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _classCallCheck(this, VScatter);
 	
 	    _get(Object.getPrototypeOf(VScatter.prototype), "constructor", this).call(this, props);
+	    this.getCalculatedValues(props);
 	  }
 	
 	  _createClass(VScatter, [{
+	    key: "componentWillReceiveProps",
+	    value: function componentWillReceiveProps(nextProps) {
+	      this.getCalculatedValues(nextProps);
+	    }
+	  }, {
 	    key: "getStyles",
-	    value: function getStyles() {
+	    value: function getStyles(props) {
 	      return _lodash2["default"].merge({
 	        borderColor: "transparent",
 	        borderWidth: 0,
@@ -131,14 +137,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        fontFamily: "Helvetica",
 	        fontSize: 10,
 	        textAnchor: "middle"
-	      }, this.props.style);
+	      }, props.style);
+	    }
+	  }, {
+	    key: "getCalculatedValues",
+	    value: function getCalculatedValues(props) {
+	      this.style = this.getStyles(props);
+	      this.range = {
+	        x: this.getRange(props, "x"),
+	        y: this.getRange(props, "y")
+	      };
+	      this.domain = {
+	        x: this.getDomain(props, "x"),
+	        y: this.getDomain(props, "y")
+	      };
+	      this.scale = {
+	        x: this.getScale(props, "x"),
+	        y: this.getScale(props, "y")
+	      };
 	    }
 	  }, {
 	    key: "getScale",
-	    value: function getScale(type) {
-	      var scale = this.props.scale[type] ? this.props.scale[type]().copy() : this.props.scale().copy();
-	      var range = this.getRange(type);
-	      var domain = this.getDomain(type);
+	    value: function getScale(props, axis) {
+	      var scale = props.scale[axis] ? props.scale[axis]().copy() : props.scale().copy();
+	      var range = this.range[axis];
+	      var domain = this.domain[axis];
 	      scale.range(range);
 	      scale.domain(domain);
 	      // hacky check for identity scale
@@ -152,32 +175,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: "getRange",
-	    value: function getRange(type) {
-	      if (this.props.range) {
-	        return this.props.range[type] ? this.props.range[type] : this.props.range;
+	    value: function getRange(props, axis) {
+	      if (props.range) {
+	        return props.range[axis] ? props.range[axis] : props.range;
 	      }
 	      // if the range is not given in props, calculate it from width, height and margin
-	      var style = this.getStyles();
-	      return type === "x" ? [style.margin, style.width - style.margin] : [style.height - style.margin, style.margin];
+	      return axis === "x" ? [this.style.margin, this.style.width - this.style.margin] : [this.style.height - this.style.margin, this.style.margin];
 	    }
 	  }, {
 	    key: "getDomain",
-	    value: function getDomain(type) {
-	      if (this.props.domain) {
-	        return this.props.domain[type] || this.props.domain;
-	      } else if (this.props.data) {
-	        return [_lodash2["default"].min(_lodash2["default"].pluck(this.props.data, type)), _lodash2["default"].max(_lodash2["default"].pluck(this.props.data, type))];
-	      } else {
-	        return this._getDomainFromScale(type);
+	    value: function getDomain(props, axis) {
+	      if (props.domain) {
+	        return props.domain[axis] || props.domain;
+	      } else if (props.data) {
+	        return [_lodash2["default"].min(_lodash2["default"].pluck(props.data, axis)), _lodash2["default"].max(_lodash2["default"].pluck(props.data, axis))];
 	      }
+	      return this._getDomainFromScale(props, axis);
 	    }
 	
 	    // helper method for getDomain
 	  }, {
 	    key: "_getDomainFromScale",
-	    value: function _getDomainFromScale(type) {
+	    value: function _getDomainFromScale(props, axis) {
 	      // The scale will never be undefined due to default props
-	      var scaleDomain = this.props.scale[type] ? this.props.scale[type]().domain() : this.props.scale().domain();
+	      var scaleDomain = props.scale[axis] ? props.scale[axis]().domain() : props.scale().domain();
 	
 	      // Warn when particular types of scales need more information to produce meaningful lines
 	      if (_lodash2["default"].isDate(scaleDomain[0])) {
@@ -213,10 +234,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "getBubbleSize",
 	    value: function getBubbleSize(datum, z) {
 	      var data = this.props.data;
-	      var style = this.getStyles();
 	      var zMin = _lodash2["default"].min(_lodash2["default"].pluck(data, z));
 	      var zMax = _lodash2["default"].max(_lodash2["default"].pluck(data, z));
-	      var maxRadius = this.props.maxBubbleSize || _lodash2["default"].max([style.margin, 5]);
+	      var maxRadius = this.props.maxBubbleSize || _lodash2["default"].max([this.style.margin, 5]);
 	      var maxArea = Math.PI * Math.pow(maxRadius, 2);
 	      var area = (datum[z] - zMin) / (zMax - zMin) * maxArea;
 	      var radius = Math.sqrt(area / Math.PI);
@@ -227,8 +247,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function getMockData() {
 	      var samples = 20;
 	      var domain = {
-	        x: this.getDomain("x"),
-	        y: this.getDomain("y")
+	        x: this.domain.x,
+	        y: this.domain.y
 	      };
 	      return _lodash2["default"].map(_lodash2["default"].range(samples), function (index) {
 	        return {
@@ -249,8 +269,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        plus: _pathHelpers2["default"].plus,
 	        star: _pathHelpers2["default"].star
 	      };
-	      var x = this.getScale("x").call(this, data.x);
-	      var y = this.getScale("y").call(this, data.y);
+	      var x = this.scale.x.call(this, data.x);
+	      var y = this.scale.y.call(this, data.y);
 	      var size = this.getSize(data);
 	      var symbol = this.getSymbol(data);
 	      var path = pathFunctions[symbol].call(this, x, y, size);
@@ -265,7 +285,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (data.label && this.props.showLabels) {
 	        return _react2["default"].createElement(
 	          "g",
-	          null,
+	          { key: "label-" + index },
 	          pathElement,
 	          _react2["default"].createElement(
 	            "text",
@@ -273,7 +293,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	              x: x,
 	              y: y,
 	              dy: -this.props.labelPadding || size * -1.25,
-	              key: "label-" + index,
 	              fontFamily: style.fontFamily,
 	              fontSize: style.fontSize,
 	              textAnchor: style.textAnchor },
@@ -290,8 +309,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var data = this.props.data || this.getMockData();
 	      return _lodash2["default"].map(data, function (dataPoint, index) {
-	        var style = _this.getStyles();
-	        return _this.getPathElement(dataPoint, style, index);
+	        return _this.getPathElement(dataPoint, _this.style, index);
 	      });
 	    }
 	  }, {
@@ -300,13 +318,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this.props.containerElement === "svg") {
 	        return _react2["default"].createElement(
 	          "svg",
-	          { style: this.getStyles() },
+	          { style: this.style },
 	          this.plotDataPoints()
 	        );
 	      }
 	      return _react2["default"].createElement(
 	        "g",
-	        { style: this.getStyles() },
+	        { style: this.style },
 	        this.plotDataPoints()
 	      );
 	    }
@@ -352,29 +370,103 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(_react2["default"].Component);
 	
 	var propTypes = {
-	  data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.object),
+	  /**
+	   * The data prop specifies the data to be plotted. Data should be in the form of an array
+	   * of data points where each data point should be an object with x and y properties.
+	   * Other properties may be added to the data point object, such as color, size, and symbol.
+	   * These properties will be interpreted and applied to the individual lines
+	   * @exampes [
+	   *   {x: 1, y: 125, color: "red", symbol: "triangleUp", label: "foo"},
+	   *   {x: 10, y: 257, color: "blue", symbol: "triangleDown", label: "bar"},
+	   *   {x: 100, y: 345, color: "green", symbol: "diamond", label: "baz"},
+	   * ]
+	   */
+	  data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.shape({
+	    x: _react2["default"].PropTypes.any,
+	    y: _react2["default"].PropTypes.any
+	  })),
+	  /**
+	   * The domain prop describes the range of values your chart will include. This prop can be
+	   * given as a array of the minimum and maximum expected values for your chart,
+	   * or as an object that specifies separate arrays for x and y.
+	   * If this prop is not provided, a domain will be calculated from data, or other
+	   * available information.
+	   * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+	   */
 	  domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.array,
 	    y: _react2["default"].PropTypes.array
 	  })]),
+	  /**
+	   * The range prop describes the range of pixels your chart will cover. This prop can be
+	   * given as a array of the minimum and maximum expected values for your chart,
+	   * or as an object that specifies separate arrays for x and y.
+	   * If this prop is not provided, a range will be calculated based on the height,
+	   * width, and margin provided in the style prop, or in default styles. It is usually
+	   * a good idea to let the chart component calculate its own range.
+	   * @exampes [0, 500], {x: [0, 500], y: [500, 300]}
+	   */
 	  range: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.array,
 	    y: _react2["default"].PropTypes.array
 	  })]),
+	  /**
+	   * The scale prop determines which scales your chart should use. This prop can be
+	   * given as a function, or as an object that specifies separate functions for x and y.
+	   * @exampes () => d3.time.scale(), {x: () => d3.scale.linear(), y: () => d3.scale.log()}
+	   */
 	  scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.func,
 	    y: _react2["default"].PropTypes.func
 	  })]),
+	  /**
+	   * The animate prop determines whether lines should animate with changing data.
+	   * Large datasets might animate slowly due to the inherent limits of svg rendering.
+	   */
 	  animate: _react2["default"].PropTypes.bool,
+	  /**
+	   * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
+	   * so valid Radium style objects should work for this prop, however height, width, and margin
+	   * are used to calculate range, and need to be expressed as a number of pixels
+	   * @example {opacity: 0.7, width: 500, height: 300}
+	   */
 	  style: _react2["default"].PropTypes.node,
+	  /**
+	   * The size prop determines how to scale each data point
+	   */
 	  size: _react2["default"].PropTypes.number,
+	  /**
+	   * The symbol prop determines which symbol should be drawn to represent data points.
+	   */
 	  symbol: _react2["default"].PropTypes.oneOf(["circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"]),
+	  /**
+	   * The labelPadding prop determines the amount of spacing between a data point
+	   * and its label
+	   */
 	  labelPadding: _react2["default"].PropTypes.number,
+	  /**
+	   * The bubbleProperty prop indicates which property of the data object should be used
+	   * to scale data points in a bubble chart
+	   */
 	  bubbleProperty: _react2["default"].PropTypes.string,
+	  /**
+	   * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
+	   */
 	  maxBubbleSize: _react2["default"].PropTypes.number,
+	  /**
+	   * The showLabels prop determines whether to show any labels associated with a data point.
+	   * Large datasets might animate slowly due to the inherent limits of svg rendering.
+	   * If animations are running slowly, try setting this prop to false to cut down on
+	   * the number of svg nodes
+	   */
 	  showLabels: _react2["default"].PropTypes.bool,
+	  /**
+	   * The containerElement prop specifies which element the compnent will render.
+	   * For standalone scatter plots, the containerElement prop should be "svg". If you need to
+	   * compose scatter with other chart components, the containerElement prop should
+	   * be "g", and will need to be rendered within an svg tag.
+	   */
 	  containerElement: _react2["default"].PropTypes.oneOf(["g", "svg"])
-	
 	};
 	
 	var defaultProps = {
@@ -23968,7 +24060,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	
-	var _ = __webpack_require__(19);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
 	
 	module.exports = {
 	  circle: function circle(x, y, size) {
@@ -23976,11 +24072,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  square: function square(x, y, size) {
-	    return "M " + (x - size) + "," + (y + size) + " " + "L " + (x + size) + "," + (y + size) + "L " + (x + size) + "," + (y - size) + "L " + (x - size) + "," + (y - size) + "z";
+	    var baseSize = 0.87 * size;
+	    return "M " + (x - baseSize) + "," + (y + baseSize) + " " + "L " + (x + baseSize) + "," + (y + baseSize) + "L " + (x + baseSize) + "," + (y - baseSize) + "L " + (x - baseSize) + "," + (y - baseSize) + "z";
 	  },
 	
 	  diamond: function diamond(x, y, size) {
-	    var length = Math.sqrt(2 * (size * size));
+	    var baseSize = 0.87 * size;
+	    var length = Math.sqrt(2 * (baseSize * baseSize));
 	    return "M " + x + "," + (y + length) + " " + "L " + (x + length) + "," + y + "L " + x + "," + (y - length) + "L " + (x - length) + "," + y + "z";
 	  },
 	
@@ -23995,18 +24093,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  plus: function plus(x, y, size) {
-	    return "M " + (x - size / 2) + "," + (y + size) + " " + "L " + (x + size / 2) + "," + (y + size) + "L " + (x + size / 2) + "," + (y + size / 2) + "L " + (x + size) + "," + (y + size / 2) + "L " + (x + size) + "," + (y - size / 2) + "L " + (x + size / 2) + "," + (y - size / 2) + "L " + (x + size / 2) + "," + (y - size) + "L " + (x - size / 2) + "," + (y - size) + "L " + (x - size / 2) + "," + (y - size / 2) + "L " + (x - size) + "," + (y - size / 2) + "L " + (x - size) + "," + (y + size / 2) + "L " + (x - size / 2) + "," + (y + size / 2) + "z";
+	    var baseSize = 1.1 * size;
+	    return "M " + (x - baseSize / 2.5) + "," + (y + baseSize) + " " + "L " + (x + baseSize / 2.5) + "," + (y + baseSize) + "L " + (x + baseSize / 2.5) + "," + (y + baseSize / 2.5) + "L " + (x + baseSize) + "," + (y + baseSize / 2.5) + "L " + (x + baseSize) + "," + (y - baseSize / 2.5) + "L " + (x + baseSize / 2.5) + "," + (y - baseSize / 2.5) + "L " + (x + baseSize / 2.5) + "," + (y - baseSize) + "L " + (x - baseSize / 2.5) + "," + (y - baseSize) + "L " + (x - baseSize / 2.5) + "," + (y - baseSize / 2.5) + "L " + (x - baseSize) + "," + (y - baseSize / 2.5) + "L " + (x - baseSize) + "," + (y + baseSize / 2.5) + "L " + (x - baseSize / 2.5) + "," + (y + baseSize / 2.5) + "z";
 	  },
 	
 	  star: function star(x, y, size) {
-	    var baseSize = 1.2 * size;
+	    var baseSize = 1.35 * size;
 	    var angle = Math.PI / 5;
-	    var starCoords = _.map(_.range(10), function (index) {
+	    var starCoords = _lodash2["default"].map(_lodash2["default"].range(10), function (index) {
 	      var length = index % 2 === 0 ? baseSize : baseSize / 2;
-	      return "L " + (length * Math.sin(angle * (index + 1)) + x) + ", " + (length * Math.cos(angle * (index + 1)) + y);
+	      return length * Math.sin(angle * (index + 1)) + x + "," + (length * Math.cos(angle * (index + 1)) + y);
 	    });
-	    var path = starCoords.toString();
-	    return "M " + (x + baseSize) + "," + (y + baseSize) + " " + path + "z";
+	    return "M" + starCoords.join("L") + "z";
 	  }
 	};
 
