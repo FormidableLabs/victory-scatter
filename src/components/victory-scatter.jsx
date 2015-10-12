@@ -239,7 +239,31 @@ class VictoryScatter extends React.Component {
 }
 
 const propTypes = {
-  data: React.PropTypes.arrayOf(React.PropTypes.object),
+  /**
+   * The data prop specifies the data to be plotted. Data should be in the form of an array
+   * of data points where each data point should be an object with x and y properties.
+   * Other properties may be added to the data point object, such as color, size, and symbol.
+   * These properties will be interpreted and applied to the individual lines
+   * @exampes [
+   *   {x: 1, y: 125, color: "red", symbol: "triangleUp", label: "foo"},
+   *   {x: 10, y: 257, color: "blue", symbol: "triangleDown", label: "bar"},
+   *   {x: 100, y: 345, color: "green", symbol: "diamond", label: "baz"},
+   * ]
+   */
+  data: React.PropTypes.arrayOf(
+    React.PropTypes.shape({
+      x: React.PropTypes.any,
+      y: React.PropTypes.any
+    })
+  ),
+  /**
+   * The domain prop describes the range of values your chart will include. This prop can be
+   * given as a array of the minimum and maximum expected values for your chart,
+   * or as an object that specifies separate arrays for x and y.
+   * If this prop is not provided, a domain will be calculated from data, or other
+   * available information.
+   * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+   */
   domain: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.shape({
@@ -247,6 +271,15 @@ const propTypes = {
       y: React.PropTypes.array
     })
   ]),
+  /**
+   * The range prop describes the range of pixels your chart will cover. This prop can be
+   * given as a array of the minimum and maximum expected values for your chart,
+   * or as an object that specifies separate arrays for x and y.
+   * If this prop is not provided, a range will be calculated based on the height,
+   * width, and margin provided in the style prop, or in default styles. It is usually
+   * a good idea to let the chart component calculate its own range.
+   * @exampes [0, 500], {x: [0, 500], y: [500, 300]}
+   */
   range: React.PropTypes.oneOfType([
     React.PropTypes.array,
     React.PropTypes.shape({
@@ -254,6 +287,11 @@ const propTypes = {
       y: React.PropTypes.array
     })
   ]),
+  /**
+   * The scale prop determines which scales your chart should use. This prop can be
+   * given as a function, or as an object that specifies separate functions for x and y.
+   * @exampes () => d3.time.scale(), {x: () => d3.scale.linear(), y: () => d3.scale.log()}
+   */
   scale: React.PropTypes.oneOfType([
     React.PropTypes.func,
     React.PropTypes.shape({
@@ -261,16 +299,55 @@ const propTypes = {
       y: React.PropTypes.func
     })
   ]),
+  /**
+   * The animate prop determines whether lines should animate with changing data.
+   * Large datasets might animate slowly due to the inherent limits of svg rendering.
+   */
   animate: React.PropTypes.bool,
+  /**
+   * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
+   * so valid Radium style objects should work for this prop, however height, width, and margin
+   * are used to calculate range, and need to be expressed as a number of pixels
+   * @example {opacity: 0.7, width: 500, height: 300}
+   */
   style: React.PropTypes.node,
+  /**
+   * The size prop determines how to scale each data point
+   */
   size: React.PropTypes.number,
+  /**
+   * The symbol prop determines which symbol should be drawn to represent data points.
+   */
   symbol: React.PropTypes.oneOf([
     "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
   ]),
+  /**
+   * The labelPadding prop determines the amount of spacing between a data point
+   * and its label
+   */
   labelPadding: React.PropTypes.number,
+  /**
+   * The bubbleProperty prop indicates which property of the data object should be used
+   * to scale data points in a bubble chart
+   */
   bubbleProperty: React.PropTypes.string,
+  /**
+   * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
+   */
   maxBubbleSize: React.PropTypes.number,
+  /**
+   * The showLabels prop determines whether to show any labels associated with a data point.
+   * Large datasets might animate slowly due to the inherent limits of svg rendering.
+   * If animations are running slowly, try setting this prop to false to cut down on
+   * the number of svg nodes
+   */
   showLabels: React.PropTypes.bool,
+  /**
+   * The containerElement prop specifies which element the compnent will render.
+   * For standalone scatter plots, the containerElement prop should be "svg". If you need to
+   * compose scatter with other chart components, the containerElement prop should
+   * be "g", and will need to be rendered within an svg tag.
+   */
   containerElement: React.PropTypes.oneOf(["g", "svg"])
 };
 
