@@ -159,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: "getScale",
 	    value: function getScale(props, axis) {
-	      var scale = props.scale[axis] ? props.scale[axis]().copy() : props.scale().copy();
+	      var scale = props.scale[axis] ? props.scale[axis].copy() : props.scale.copy();
 	      var range = this.range[axis];
 	      var domain = this.domain[axis];
 	      scale.range(range);
@@ -198,7 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "_getDomainFromScale",
 	    value: function _getDomainFromScale(props, axis) {
 	      // The scale will never be undefined due to default props
-	      var scaleDomain = props.scale[axis] ? props.scale[axis]().domain() : props.scale().domain();
+	      var scaleDomain = props.scale[axis] ? props.scale[axis].domain() : props.scale.domain();
 	
 	      // Warn when particular types of scales need more information to produce meaningful lines
 	      if (_lodash2["default"].isDate(scaleDomain[0])) {
@@ -350,7 +350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this.props.animate) {
 	        return _react2["default"].createElement(
 	          _victoryAnimation.VictoryAnimation,
-	          { data: this.props },
+	          _extends({}, this.props.animate, { data: this.props }),
 	          function (props) {
 	            return _react2["default"].createElement(VScatter, _extends({}, props, {
 	              animate: _this2.props.animate,
@@ -413,17 +413,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /**
 	   * The scale prop determines which scales your chart should use. This prop can be
 	   * given as a function, or as an object that specifies separate functions for x and y.
-	   * @exampes () => d3.time.scale(), {x: () => d3.scale.linear(), y: () => d3.scale.log()}
+	   * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
 	   */
 	  scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.shape({
 	    x: _react2["default"].PropTypes.func,
 	    y: _react2["default"].PropTypes.func
 	  })]),
 	  /**
-	   * The animate prop determines whether lines should animate with changing data.
-	   * Large datasets might animate slowly due to the inherent limits of svg rendering.
-	   */
-	  animate: _react2["default"].PropTypes.bool,
+	    * The animate prop specifies props for victory-animation to use. It this prop is
+	    * not given, the scatter plot will not tween between changing data / style props.
+	    * Large datasets might animate slowly due to the inherent limits of svg rendering.
+	    * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
+	    */
+	  animate: _react2["default"].PropTypes.object,
 	  /**
 	   * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
 	   * so valid Radium style objects should work for this prop, however height, width, and margin
@@ -470,12 +472,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	var defaultProps = {
-	  animate: false,
 	  size: 3,
 	  symbol: "circle",
-	  scale: function scale() {
-	    return _d32["default"].scale.linear();
-	  },
+	  scale: _d32["default"].scale.linear(),
 	  showLabels: true,
 	  containerElement: "svg"
 	};
