@@ -48,8 +48,8 @@ class VScatter extends React.Component {
   }
 
   getScale(props, axis) {
-    const scale = props.scale[axis] ? props.scale[axis]().copy() :
-      props.scale().copy();
+    const scale = props.scale[axis] ? props.scale[axis].copy() :
+      props.scale.copy();
     const range = this.range[axis];
     const domain = this.domain[axis];
     scale.range(range);
@@ -90,8 +90,8 @@ class VScatter extends React.Component {
   // helper method for getDomain
   _getDomainFromScale(props, axis) {
     // The scale will never be undefined due to default props
-    const scaleDomain = props.scale[axis] ? props.scale[axis]().domain() :
-      props.scale().domain();
+    const scaleDomain = props.scale[axis] ? props.scale[axis].domain() :
+      props.scale.domain();
 
     // Warn when particular types of scales need more information to produce meaningful lines
     if (_.isDate(scaleDomain[0])) {
@@ -220,7 +220,7 @@ class VictoryScatter extends React.Component {
   render() {
     if (this.props.animate) {
       return (
-        <VictoryAnimation data={this.props}>
+        <VictoryAnimation {...this.props.animate} data={this.props}>
           {(props) => {
             return (
               <VScatter
@@ -290,7 +290,7 @@ const propTypes = {
   /**
    * The scale prop determines which scales your chart should use. This prop can be
    * given as a function, or as an object that specifies separate functions for x and y.
-   * @exampes () => d3.time.scale(), {x: () => d3.scale.linear(), y: () => d3.scale.log()}
+   * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
    */
   scale: React.PropTypes.oneOfType([
     React.PropTypes.func,
@@ -299,11 +299,13 @@ const propTypes = {
       y: React.PropTypes.func
     })
   ]),
-  /**
-   * The animate prop determines whether lines should animate with changing data.
+ /**
+   * The animate prop specifies props for victory-animation to use. It this prop is
+   * not given, the scatter plot will not tween between changing data / style props.
    * Large datasets might animate slowly due to the inherent limits of svg rendering.
+   * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
    */
-  animate: React.PropTypes.bool,
+  animate: React.PropTypes.object,
   /**
    * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
    * so valid Radium style objects should work for this prop, however height, width, and margin
@@ -352,10 +354,9 @@ const propTypes = {
 };
 
 const defaultProps = {
-  animate: false,
   size: 3,
   symbol: "circle",
-  scale: () => d3.scale.linear(),
+  scale: d3.scale.linear(),
   showLabels: true,
   containerElement: "svg"
 };

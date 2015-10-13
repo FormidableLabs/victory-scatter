@@ -58,7 +58,7 @@ class App extends React.Component {
           <VictoryScatter
             containerElement="g"
             domain={[0, 600]}
-            animate={true}
+            animate={{velocity: 0.03}}
             data={this.state.data}/>
         </svg>
 
@@ -74,7 +74,6 @@ class App extends React.Component {
           <VictoryScatter
             containerElement="g"
             style={{color: "blue", opacity: 0.7}}
-            animate={false}
             bubbleProperty="z"
             maxBubbleSize={20}
             showLabels={false}
