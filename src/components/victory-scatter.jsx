@@ -325,9 +325,9 @@ const propTypes = {
    * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
    * so valid Radium style objects should work for this prop, however height, width, and margin
    * are used to calculate range, and need to be expressed as a number of pixels
-   * @example {width: 300, margin: 50, scatter: {fill: red, opacity, 0.8}, label: {padding: 20}}
+   * @example {width: 300, margin: 50, data: {fill: red, opacity, 0.8}, labels: {padding: 20}}
    */
-  style: React.PropTypes.node,
+  style: React.PropTypes.object,
   /**
    * The size prop determines how to scale each data point
    */

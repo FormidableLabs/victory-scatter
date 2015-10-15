@@ -1,6 +1,7 @@
 /*global document:false */
 /*global window:false */
 import React from "react";
+import ReactDOM from "react-dom";
 import Radium from "radium";
 import _ from "lodash";
 import {VictoryScatter} from "../src/index";
@@ -105,4 +106,4 @@ App.propTypes = {
 };
 
 const content = document.getElementById("content");
-React.render(<App data={getData()}/>, content);
+ReactDOM.render(<App data={getData()}/>, content);
