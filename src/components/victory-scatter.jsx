@@ -12,13 +12,13 @@ const styles = {
     height: 300,
     margin: 50
   },
-  scatter: {
+  data: {
     fill: "#756f6a",
     opacity: 1,
     stroke: "transparent",
     strokeWidth: 0
   },
-  label: {
+  labels: {
     stroke: "none",
     fill: "black",
     fontFamily: "Helvetica",
@@ -41,11 +41,11 @@ class VScatter extends React.Component {
     if (!props.style) {
       return styles;
     }
-    const {scatter, label, ...base} = props.style;
+    const {data, labels, ...base} = props.style;
     return {
       base: _.merge({}, styles.base, base),
-      label: _.merge({}, styles.label, label),
-      scatter: _.merge({}, styles.scatter, scatter)
+      labels: _.merge({}, styles.labels, labels),
+      data: _.merge({}, styles.data, data)
     };
   }
 
@@ -181,7 +181,7 @@ class VScatter extends React.Component {
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, x, y, size);
-    const scatterStyle = _.merge({}, this.style.scatter, data);
+    const scatterStyle = _.merge({}, this.style.data, data);
     const pathElement = (
       <path
         d={path}
@@ -197,8 +197,8 @@ class VScatter extends React.Component {
           <text
             x={x}
             y={y}
-            dy={-this.style.label.padding || size * -1.25}
-            style={this.style.label}>
+            dy={-this.style.labels.padding || size * -1.25}
+            style={this.style.labels}>
             {data.label}
           </text>
         </g>

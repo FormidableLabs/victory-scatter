@@ -39,10 +39,10 @@ const symbolStyle = {
   height: 500,
   margin: 50,
   width: 500,
-  scatter: {
+  data: {
     fill: "red"
   },
-  label: {
+  labels: {
     fontSize: 15,
     padding: 20,
     fill: "grey"
@@ -83,7 +83,7 @@ class App extends React.Component {
           style={_.merge(
             {},
             style.base,
-            {scatter: {fill: "blue", opacity: 0.7}}
+            {data: {fill: "blue", opacity: 0.7}}
           )}
           bubbleProperty="z"
           maxBubbleSize={20}
