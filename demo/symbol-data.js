@@ -5,7 +5,7 @@ const symbolData = [
     size: 8,
     symbol: "circle",
     label: "circle",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 2,
@@ -13,7 +13,7 @@ const symbolData = [
     size: 8,
     symbol: "diamond",
     label: "diamond",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 3,
@@ -21,7 +21,7 @@ const symbolData = [
     size: 8,
     symbol: "plus",
     label: "plus",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 4,
@@ -29,7 +29,7 @@ const symbolData = [
     size: 8,
     symbol: "square",
     label: "square",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 5,
@@ -37,7 +37,7 @@ const symbolData = [
     size: 8,
     symbol: "star",
     label: "star",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 6,
@@ -45,7 +45,7 @@ const symbolData = [
     size: 8,
     symbol: "triangleDown",
     label: "triangleDown",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   }, {
     x: 7,
@@ -53,7 +53,7 @@ const symbolData = [
     size: 8,
     symbol: "triangleUp",
     label: "triangleUp",
-    color: "red",
+    fill: "red",
     opacity: 0.8
   },
 ];

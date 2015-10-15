@@ -6,6 +6,27 @@ import log from "../log";
 import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
+const styles = {
+  base: {
+    width: 500,
+    height: 300,
+    margin: 50
+  },
+  scatter: {
+    fill: "#756f6a",
+    opacity: 1,
+    stroke: "transparent",
+    strokeWidth: 0
+  },
+  label: {
+    stroke: "none",
+    fill: "black",
+    fontFamily: "Helvetica",
+    fontSize: 10,
+    textAnchor: "middle"
+  }
+};
+
 class VScatter extends React.Component {
   constructor(props) {
     super(props);
@@ -17,18 +38,15 @@ class VScatter extends React.Component {
   }
 
   getStyles(props) {
-    return _.merge({
-      borderColor: "transparent",
-      borderWidth: 0,
-      color: "#756f6a",
-      opacity: 1,
-      margin: 20,
-      width: 500,
-      height: 500,
-      fontFamily: "Helvetica",
-      fontSize: 10,
-      textAnchor: "middle"
-    }, props.style);
+    if (!props.style) {
+      return styles;
+    }
+    const {scatter, label, ...base} = props.style;
+    return {
+      base: _.merge({}, styles.base, base),
+      label: _.merge({}, styles.label, label),
+      scatter: _.merge({}, styles.scatter, scatter)
+    };
   }
 
   getCalculatedValues(props) {
@@ -70,9 +88,10 @@ class VScatter extends React.Component {
       return props.range[axis] ? props.range[axis] : props.range;
     }
     // if the range is not given in props, calculate it from width, height and margin
+    const style = this.style.base;
     return axis === "x" ?
-      [this.style.margin, this.style.width - this.style.margin] :
-      [this.style.height - this.style.margin, this.style.margin];
+      [style.margin, style.width - style.margin] :
+      [style.height - style.margin, style.margin];
   }
 
   getDomain(props, axis) {
@@ -126,7 +145,7 @@ class VScatter extends React.Component {
     const data = this.props.data;
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || _.max([this.style.margin, 5]);
+    const maxRadius = this.props.maxBubbleSize || _.max([this.style.base.margin, 5]);
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
@@ -147,7 +166,7 @@ class VScatter extends React.Component {
     });
   }
 
-  getPathElement(data, style, index) {
+  getPathElement(data, index) {
     const pathFunctions = {
       circle: pathHelpers.circle,
       square: pathHelpers.square,
@@ -162,15 +181,13 @@ class VScatter extends React.Component {
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, x, y, size);
+    const scatterStyle = _.merge({}, this.style.scatter, data);
     const pathElement = (
       <path
         d={path}
-        fill={data.color || style.color}
         key={index}
-        opacity={data.opacity || style.opacity}
         shapeRendering="optimizeSpeed"
-        stroke={data.borderColor || style.borderColor}
-        strokeWidth={data.borderWidth || style.borderWidth}>
+        style={scatterStyle}>
       </path>
     );
     if (data.label && this.props.showLabels) {
@@ -180,10 +197,8 @@ class VScatter extends React.Component {
           <text
             x={x}
             y={y}
-            dy={-this.props.labelPadding || size * -1.25}
-            fontFamily={style.fontFamily}
-            fontSize={style.fontSize}
-            textAnchor={style.textAnchor}>
+            dy={-this.style.label.padding || size * -1.25}
+            style={this.style.label}>
             {data.label}
           </text>
         </g>
@@ -195,18 +210,18 @@ class VScatter extends React.Component {
   plotDataPoints() {
     const data = this.props.data || this.getMockData();
     return _.map(data, (dataPoint, index) => {
-      return this.getPathElement(dataPoint, this.style, index);
+      return this.getPathElement(dataPoint, index);
     });
   }
 
   render() {
     if (this.props.containerElement === "svg") {
       return (
-        <svg style={this.style}>{this.plotDataPoints()}</svg>
+        <svg style={this.style.base}>{this.plotDataPoints()}</svg>
       );
     }
     return (
-      <g style={this.style}>{this.plotDataPoints()}</g>
+      <g style={this.style.base}>{this.plotDataPoints()}</g>
     );
   }
 }
@@ -242,12 +257,12 @@ const propTypes = {
   /**
    * The data prop specifies the data to be plotted. Data should be in the form of an array
    * of data points where each data point should be an object with x and y properties.
-   * Other properties may be added to the data point object, such as color, size, and symbol.
+   * Other properties may be added to the data point object, such as fill, size, and symbol.
    * These properties will be interpreted and applied to the individual lines
    * @exampes [
-   *   {x: 1, y: 125, color: "red", symbol: "triangleUp", label: "foo"},
-   *   {x: 10, y: 257, color: "blue", symbol: "triangleDown", label: "bar"},
-   *   {x: 100, y: 345, color: "green", symbol: "diamond", label: "baz"},
+   *   {x: 1, y: 125, fill: "red", symbol: "triangleUp", label: "foo"},
+   *   {x: 10, y: 257, fill: "blue", symbol: "triangleDown", label: "bar"},
+   *   {x: 100, y: 345, fill: "green", symbol: "diamond", label: "baz"},
    * ]
    */
   data: React.PropTypes.arrayOf(
@@ -310,7 +325,7 @@ const propTypes = {
    * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
    * so valid Radium style objects should work for this prop, however height, width, and margin
    * are used to calculate range, and need to be expressed as a number of pixels
-   * @example {opacity: 0.7, width: 500, height: 300}
+   * @example {width: 300, margin: 50, scatter: {fill: red, opacity, 0.8}, label: {padding: 20}}
    */
   style: React.PropTypes.node,
   /**
@@ -323,11 +338,6 @@ const propTypes = {
   symbol: React.PropTypes.oneOf([
     "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
   ]),
-  /**
-   * The labelPadding prop determines the amount of spacing between a data point
-   * and its label
-   */
-  labelPadding: React.PropTypes.number,
   /**
    * The bubbleProperty prop indicates which property of the data object should be used
    * to scale data points in a bubble chart
