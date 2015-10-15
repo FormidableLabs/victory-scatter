@@ -1,6 +1,7 @@
 /*global document:false */
 /*global window:false */
 import React from "react";
+import ReactDOM from "react-dom";
 import Radium from "radium";
 import _ from "lodash";
 import {VictoryScatter} from "../src/index";
@@ -19,10 +20,34 @@ const getData = function () {
       y: _.random(600),
       size: _.random(15) + 3,
       symbol: symbols[scaledIndex],
-      color: colors[_.random(0, 6)],
+      fill: colors[_.random(0, 6)],
       opacity: _.random(0.3, 1)
     };
   });
+};
+
+const style = {
+  base: {
+    border: "1px solid #ccc",
+    height: 500,
+    margin: 20,
+    width: 500
+  }
+};
+
+const symbolStyle = {
+  border: "1px solid #ccc",
+  height: 500,
+  margin: 50,
+  width: 500,
+  data: {
+    fill: "red"
+  },
+  labels: {
+    fontSize: 15,
+    padding: 20,
+    fill: "grey"
+  }
 };
 
 @Radium
@@ -31,15 +56,6 @@ class App extends React.Component {
     super(props);
     this.state = {
       data: this.props.data
-    };
-  }
-
-  getStyles() {
-    return {
-      border: "1px solid #ccc",
-      height: 500,
-      margin: 20,
-      width: 500
     };
   }
 
@@ -54,34 +70,30 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <svg style={this.getStyles()}>
-          <VictoryScatter
-            containerElement="g"
-            domain={[0, 600]}
-            animate={{velocity: 0.03}}
-            data={this.state.data}/>
-        </svg>
+        <VictoryScatter
+          style={style.base}
+          domain={[0, 600]}
+          animate={{velocity: 0.03}}
+          data={this.state.data}/>
 
-        <svg style={this.getStyles()}>
-          <VictoryScatter
-            style={{margin: 50, textAnchor: "end", fontSize: 14}}
-            labelPadding={12}
-            containerElement="g"
-            data={symbolData}/>
-        </svg>
+        <VictoryScatter
+          style={symbolStyle}
+          data={symbolData}/>
 
-        <svg style={this.getStyles()}>
-          <VictoryScatter
-            containerElement="g"
-            style={{color: "blue", opacity: 0.7}}
-            bubbleProperty="z"
-            maxBubbleSize={20}
-            showLabels={false}
-            data={bubbleData}/>
-        </svg>
+        <VictoryScatter
+          style={_.merge(
+            {},
+            style.base,
+            {data: {fill: "blue", opacity: 0.7}}
+          )}
+          bubbleProperty="z"
+          maxBubbleSize={20}
+          showLabels={false}
+          data={bubbleData}/>
 
-        <svg style={this.getStyles()}>
+        <svg style={style.base}>
           <VictoryScatter
+            style={style.base}
             containerElement="g"/>
         </svg>
       </div>
@@ -94,4 +106,4 @@ App.propTypes = {
 };
 
 const content = document.getElementById("content");
-React.render(<App data={getData()}/>, content);
+ReactDOM.render(<App data={getData()}/>, content);
