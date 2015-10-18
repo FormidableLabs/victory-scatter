@@ -134,6 +134,117 @@ return /******/ (function(modules) { // webpackBootstrap
 	var VScatter = (function (_React$Component) {
 	  _inherits(VScatter, _React$Component);
 	
+	  _createClass(VScatter, null, [{
+	    key: "propTypes",
+	    value: {
+	      /**
+	       * The data prop specifies the data to be plotted. Data should be in the form of an array
+	       * of data points where each data point should be an object with x and y properties.
+	       * Other properties may be added to the data point object, such as fill, size, and symbol.
+	       * These properties will be interpreted and applied to the individual lines
+	       * @exampes [
+	       *   {x: 1, y: 125, fill: "red", symbol: "triangleUp", label: "foo"},
+	       *   {x: 10, y: 257, fill: "blue", symbol: "triangleDown", label: "bar"},
+	       *   {x: 100, y: 345, fill: "green", symbol: "diamond", label: "baz"},
+	       * ]
+	       */
+	      data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.shape({
+	        x: _react2["default"].PropTypes.any,
+	        y: _react2["default"].PropTypes.any
+	      })),
+	      /**
+	       * The domain prop describes the range of values your chart will include. This prop can be
+	       * given as a array of the minimum and maximum expected values for your chart,
+	       * or as an object that specifies separate arrays for x and y.
+	       * If this prop is not provided, a domain will be calculated from data, or other
+	       * available information.
+	       * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+	       */
+	      domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
+	        x: _react2["default"].PropTypes.array,
+	        y: _react2["default"].PropTypes.array
+	      })]),
+	      /**
+	       * The range prop describes the range of pixels your chart will cover. This prop can be
+	       * given as a array of the minimum and maximum expected values for your chart,
+	       * or as an object that specifies separate arrays for x and y.
+	       * If this prop is not provided, a range will be calculated based on the height,
+	       * width, and margin provided in the style prop, or in default styles. It is usually
+	       * a good idea to let the chart component calculate its own range.
+	       * @exampes [0, 500], {x: [0, 500], y: [500, 300]}
+	       */
+	      range: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
+	        x: _react2["default"].PropTypes.array,
+	        y: _react2["default"].PropTypes.array
+	      })]),
+	      /**
+	       * The scale prop determines which scales your chart should use. This prop can be
+	       * given as a function, or as an object that specifies separate functions for x and y.
+	       * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
+	       */
+	      scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.shape({
+	        x: _react2["default"].PropTypes.func,
+	        y: _react2["default"].PropTypes.func
+	      })]),
+	      /**
+	        * The animate prop specifies props for victory-animation to use. It this prop is
+	        * not given, the scatter plot will not tween between changing data / style props.
+	        * Large datasets might animate slowly due to the inherent limits of svg rendering.
+	        * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
+	        */
+	      animate: _react2["default"].PropTypes.object,
+	      /**
+	       * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
+	       * so valid Radium style objects should work for this prop, however height, width, and margin
+	       * are used to calculate range, and need to be expressed as a number of pixels
+	       * @example {width: 300, margin: 50, data: {fill: "red", opacity, 0.8}, labels: {padding: 20}}
+	       */
+	      style: _react2["default"].PropTypes.object,
+	      /**
+	       * The size prop determines how to scale each data point
+	       */
+	      size: _react2["default"].PropTypes.number,
+	      /**
+	       * The symbol prop determines which symbol should be drawn to represent data points.
+	       */
+	      symbol: _react2["default"].PropTypes.oneOf(["circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"]),
+	      /**
+	       * The bubbleProperty prop indicates which property of the data object should be used
+	       * to scale data points in a bubble chart
+	       */
+	      bubbleProperty: _react2["default"].PropTypes.string,
+	      /**
+	       * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
+	       */
+	      maxBubbleSize: _react2["default"].PropTypes.number,
+	      /**
+	       * The showLabels prop determines whether to show any labels associated with a data point.
+	       * Large datasets might animate slowly due to the inherent limits of svg rendering.
+	       * If animations are running slowly, try setting this prop to false to cut down on
+	       * the number of svg nodes
+	       */
+	      showLabels: _react2["default"].PropTypes.bool,
+	      /**
+	       * The containerElement prop specifies which element the compnent will render.
+	       * For standalone scatter plots, the containerElement prop should be "svg". If you need to
+	       * compose scatter with other chart components, the containerElement prop should
+	       * be "g", and will need to be rendered within an svg tag.
+	       */
+	      containerElement: _react2["default"].PropTypes.oneOf(["g", "svg"])
+	    },
+	    enumerable: true
+	  }, {
+	    key: "defaultProps",
+	    value: {
+	      size: 3,
+	      symbol: "circle",
+	      scale: _d32["default"].scale.linear(),
+	      showLabels: true,
+	      containerElement: "svg"
+	    },
+	    enumerable: true
+	  }]);
+	
 	  function VScatter(props) {
 	    _classCallCheck(this, VScatter);
 	
@@ -358,6 +469,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	var VictoryScatter = (function (_React$Component2) {
 	  _inherits(VictoryScatter, _React$Component2);
 	
+	  _createClass(VictoryScatter, null, [{
+	    key: "propTypes",
+	
+	    /* eslint-disable react/prop-types */
+	    // ^ see: https://github.com/yannickcr/eslint-plugin-react/issues/106
+	    value: _extends({}, VScatter.propTypes),
+	    enumerable: true
+	  }, {
+	    key: "defaultProps",
+	    value: _extends({}, VScatter.defaultProps),
+	    enumerable: true
+	  }]);
+	
 	  function VictoryScatter(props) {
 	    _classCallCheck(this, _VictoryScatter);
 	
@@ -370,15 +494,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this2 = this;
 	
 	      if (this.props.animate) {
+	        // Do less work by having `VictoryAnimation` tween only values that
+	        // make sense to tween. In the future, allow customization of animated
+	        // prop whitelist/blacklist?
+	        var animateData = _lodash2["default"].omit(this.props, ["animate", "scale", "showLabels", "containerElement"]);
 	        return _react2["default"].createElement(
 	          _victoryAnimation.VictoryAnimation,
-	          _extends({}, this.props.animate, { data: this.props }),
+	          _extends({}, this.props.animate, { data: animateData }),
 	          function (props) {
-	            return _react2["default"].createElement(VScatter, _extends({}, props, {
-	              animate: _this2.props.animate,
-	              scale: _this2.props.scale,
-	              showLabels: _this2.props.showLabels,
-	              containerElement: _this2.props.containerElement }));
+	            return _react2["default"].createElement(VScatter, _extends({}, _this2.props, props));
 	          }
 	        );
 	      }
@@ -390,116 +514,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  VictoryScatter = (0, _radium2["default"])(VictoryScatter) || VictoryScatter;
 	  return VictoryScatter;
 	})(_react2["default"].Component);
-	
-	var propTypes = {
-	  /**
-	   * The data prop specifies the data to be plotted. Data should be in the form of an array
-	   * of data points where each data point should be an object with x and y properties.
-	   * Other properties may be added to the data point object, such as fill, size, and symbol.
-	   * These properties will be interpreted and applied to the individual lines
-	   * @exampes [
-	   *   {x: 1, y: 125, fill: "red", symbol: "triangleUp", label: "foo"},
-	   *   {x: 10, y: 257, fill: "blue", symbol: "triangleDown", label: "bar"},
-	   *   {x: 100, y: 345, fill: "green", symbol: "diamond", label: "baz"},
-	   * ]
-	   */
-	  data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.shape({
-	    x: _react2["default"].PropTypes.any,
-	    y: _react2["default"].PropTypes.any
-	  })),
-	  /**
-	   * The domain prop describes the range of values your chart will include. This prop can be
-	   * given as a array of the minimum and maximum expected values for your chart,
-	   * or as an object that specifies separate arrays for x and y.
-	   * If this prop is not provided, a domain will be calculated from data, or other
-	   * available information.
-	   * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
-	   */
-	  domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
-	    x: _react2["default"].PropTypes.array,
-	    y: _react2["default"].PropTypes.array
-	  })]),
-	  /**
-	   * The range prop describes the range of pixels your chart will cover. This prop can be
-	   * given as a array of the minimum and maximum expected values for your chart,
-	   * or as an object that specifies separate arrays for x and y.
-	   * If this prop is not provided, a range will be calculated based on the height,
-	   * width, and margin provided in the style prop, or in default styles. It is usually
-	   * a good idea to let the chart component calculate its own range.
-	   * @exampes [0, 500], {x: [0, 500], y: [500, 300]}
-	   */
-	  range: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
-	    x: _react2["default"].PropTypes.array,
-	    y: _react2["default"].PropTypes.array
-	  })]),
-	  /**
-	   * The scale prop determines which scales your chart should use. This prop can be
-	   * given as a function, or as an object that specifies separate functions for x and y.
-	   * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
-	   */
-	  scale: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.func, _react2["default"].PropTypes.shape({
-	    x: _react2["default"].PropTypes.func,
-	    y: _react2["default"].PropTypes.func
-	  })]),
-	  /**
-	    * The animate prop specifies props for victory-animation to use. It this prop is
-	    * not given, the scatter plot will not tween between changing data / style props.
-	    * Large datasets might animate slowly due to the inherent limits of svg rendering.
-	    * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
-	    */
-	  animate: _react2["default"].PropTypes.object,
-	  /**
-	   * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
-	   * so valid Radium style objects should work for this prop, however height, width, and margin
-	   * are used to calculate range, and need to be expressed as a number of pixels
-	   * @example {width: 300, margin: 50, data: {fill: "red", opacity, 0.8}, labels: {padding: 20}}
-	   */
-	  style: _react2["default"].PropTypes.object,
-	  /**
-	   * The size prop determines how to scale each data point
-	   */
-	  size: _react2["default"].PropTypes.number,
-	  /**
-	   * The symbol prop determines which symbol should be drawn to represent data points.
-	   */
-	  symbol: _react2["default"].PropTypes.oneOf(["circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"]),
-	  /**
-	   * The bubbleProperty prop indicates which property of the data object should be used
-	   * to scale data points in a bubble chart
-	   */
-	  bubbleProperty: _react2["default"].PropTypes.string,
-	  /**
-	   * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
-	   */
-	  maxBubbleSize: _react2["default"].PropTypes.number,
-	  /**
-	   * The showLabels prop determines whether to show any labels associated with a data point.
-	   * Large datasets might animate slowly due to the inherent limits of svg rendering.
-	   * If animations are running slowly, try setting this prop to false to cut down on
-	   * the number of svg nodes
-	   */
-	  showLabels: _react2["default"].PropTypes.bool,
-	  /**
-	   * The containerElement prop specifies which element the compnent will render.
-	   * For standalone scatter plots, the containerElement prop should be "svg". If you need to
-	   * compose scatter with other chart components, the containerElement prop should
-	   * be "g", and will need to be rendered within an svg tag.
-	   */
-	  containerElement: _react2["default"].PropTypes.oneOf(["g", "svg"])
-	};
-	
-	var defaultProps = {
-	  size: 3,
-	  symbol: "circle",
-	  scale: _d32["default"].scale.linear(),
-	  showLabels: true,
-	  containerElement: "svg"
-	};
-	
-	VictoryScatter.propTypes = propTypes;
-	VictoryScatter.defaultProps = defaultProps;
-	VScatter.propTypes = propTypes;
-	VScatter.defaultProps = defaultProps;
 	
 	exports["default"] = VictoryScatter;
 	module.exports = exports["default"];
