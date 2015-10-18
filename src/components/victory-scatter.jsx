@@ -234,18 +234,15 @@ class VictoryScatter extends React.Component {
 
   render() {
     if (this.props.animate) {
+      // Do less work by having `VictoryAnimation` tween only values that
+      // make sense to tween. In the future, allow customization of animated
+      // prop whitelist/blacklist?
+      const animateData = _.omit(this.props, [
+        "animate", "scale", "showLabels", "containerElement"
+      ]);
       return (
-        <VictoryAnimation {...this.props.animate} data={this.props}>
-          {(props) => {
-            return (
-              <VScatter
-                {...props}
-                animate={this.props.animate}
-                scale={this.props.scale}
-                showLabels={this.props.showLabels}
-                containerElement={this.props.containerElement}/>
-            );
-          }}
+        <VictoryAnimation {...this.props.animate} data={animateData}>
+          {props => <VScatter {...this.props} {...props}/>}
         </VictoryAnimation>
       );
     }
