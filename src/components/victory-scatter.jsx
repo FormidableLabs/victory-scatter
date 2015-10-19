@@ -130,12 +130,11 @@ class VScatter extends React.Component {
      */
     showLabels: React.PropTypes.bool,
     /**
-     * The containerElement prop specifies which element the compnent will render.
-     * For standalone scatter plots, the containerElement prop should be "svg". If you need to
-     * compose scatter with other chart components, the containerElement prop should
-     * be "g", and will need to be rendered within an svg tag.
+     * The standalone prop determines whether the component will render a standalone svg
+     * or a <g> tag that will be included in an external svg. Set standalone to false to
+     * compose VictoryAxis with other components within an enclosing <svg> tag.
      */
-    containerElement: React.PropTypes.oneOf(["g", "svg"])
+    standalone: React.PropTypes.bool
   };
 
   static defaultProps = {
@@ -143,7 +142,7 @@ class VScatter extends React.Component {
     symbol: "circle",
     scale: d3.scale.linear(),
     showLabels: true,
-    containerElement: "svg"
+    standalone: true
   };
 
   constructor(props) {
@@ -333,7 +332,7 @@ class VScatter extends React.Component {
   }
 
   render() {
-    if (this.props.containerElement === "svg") {
+    if (this.props.standalone === true) {
       return (
         <svg style={this.style.base}>{this.plotDataPoints()}</svg>
       );
@@ -361,7 +360,7 @@ export default class VictoryScatter extends React.Component {
       // make sense to tween. In the future, allow customization of animated
       // prop whitelist/blacklist?
       const animateData = _.omit(this.props, [
-        "animate", "scale", "showLabels", "containerElement"
+        "animate", "scale", "showLabels", "standalone"
       ]);
       return (
         <VictoryAnimation {...this.props.animate} data={animateData}>
