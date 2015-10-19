@@ -132,7 +132,7 @@ class VScatter extends React.Component {
     /**
      * The standalone prop determines whether the component will render a standalone svg
      * or a <g> tag that will be included in an external svg. Set standalone to false to
-     * compose VictoryAxis with other components within an enclosing <svg> tag.
+     * compose VictoryScatter with other components within an enclosing <svg> tag.
      */
     standalone: React.PropTypes.bool
   };
