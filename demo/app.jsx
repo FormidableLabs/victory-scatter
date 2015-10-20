@@ -27,7 +27,7 @@ const getData = function () {
 };
 
 const style = {
-  base: {
+  parent: {
     border: "1px solid #ccc",
     height: 500,
     margin: 20,
@@ -36,10 +36,12 @@ const style = {
 };
 
 const symbolStyle = {
-  border: "1px solid #ccc",
-  height: 500,
-  margin: 50,
-  width: 500,
+  parent: {
+    border: "1px solid #ccc",
+    height: 500,
+    margin: 50,
+    width: 500
+  },
   data: {
     fill: "red"
   },
@@ -71,7 +73,7 @@ class App extends React.Component {
     return (
       <div>
         <VictoryScatter
-          style={style.base}
+          style={style}
           domain={[0, 600]}
           animate={{velocity: 0.03}}
           data={this.state.data}/>
@@ -83,7 +85,7 @@ class App extends React.Component {
         <VictoryScatter
           style={_.merge(
             {},
-            style.base,
+            style,
             {data: {fill: "blue", opacity: 0.7}}
           )}
           bubbleProperty="z"
@@ -91,9 +93,9 @@ class App extends React.Component {
           showLabels={false}
           data={bubbleData}/>
 
-        <svg style={style.base}>
+        <svg style={style.parent}>
           <VictoryScatter
-            style={style.base}
+            style={style}
             containerElement="g"/>
         </svg>
       </div>

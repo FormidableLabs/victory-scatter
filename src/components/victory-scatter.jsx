@@ -19,8 +19,8 @@ const styles = {
     strokeWidth: 0
   },
   labels: {
-    stroke: "none",
-    fill: "black",
+    stroke: "transparent",
+    fill: "#756f6a",
     fontFamily: "Helvetica",
     fontSize: 10,
     textAnchor: "middle"
@@ -158,9 +158,9 @@ class VScatter extends React.Component {
     if (!props.style) {
       return styles;
     }
-    const {data, labels, ...base} = props.style;
+    const {data, labels, parent} = props.style;
     return {
-      base: _.merge({}, styles.base, base),
+      parent: _.merge({}, styles.parent, parent),
       labels: _.merge({}, styles.labels, labels),
       data: _.merge({}, styles.data, data)
     };
@@ -205,7 +205,7 @@ class VScatter extends React.Component {
       return props.range[axis] ? props.range[axis] : props.range;
     }
     // if the range is not given in props, calculate it from width, height and margin
-    const style = this.style.base;
+    const style = this.style.parent;
     return axis === "x" ?
       [style.margin, style.width - style.margin] :
       [style.height - style.margin, style.margin];
@@ -262,7 +262,7 @@ class VScatter extends React.Component {
     const data = this.props.data;
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || _.max([this.style.base.margin, 5]);
+    const maxRadius = this.props.maxBubbleSize || _.max([this.style.parent.margin, 5]);
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
@@ -334,11 +334,11 @@ class VScatter extends React.Component {
   render() {
     if (this.props.standalone === true) {
       return (
-        <svg style={this.style.base}>{this.plotDataPoints()}</svg>
+        <svg style={this.style.parent}>{this.plotDataPoints()}</svg>
       );
     }
     return (
-      <g style={this.style.base}>{this.plotDataPoints()}</g>
+      <g style={this.style.parent}>{this.plotDataPoints()}</g>
     );
   }
 }
