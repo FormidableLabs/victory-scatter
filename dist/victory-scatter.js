@@ -78,8 +78,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -123,8 +121,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    strokeWidth: 0
 	  },
 	  labels: {
-	    stroke: "none",
-	    fill: "black",
+	    stroke: "transparent",
+	    fill: "#756f6a",
 	    fontFamily: "Helvetica",
 	    fontSize: 10,
 	    textAnchor: "middle"
@@ -225,12 +223,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	       */
 	      showLabels: _react2["default"].PropTypes.bool,
 	      /**
-	       * The containerElement prop specifies which element the compnent will render.
-	       * For standalone scatter plots, the containerElement prop should be "svg". If you need to
-	       * compose scatter with other chart components, the containerElement prop should
-	       * be "g", and will need to be rendered within an svg tag.
+	       * The standalone prop determines whether the component will render a standalone svg
+	       * or a <g> tag that will be included in an external svg. Set standalone to false to
+	       * compose VictoryScatter with other components within an enclosing <svg> tag.
 	       */
-	      containerElement: _react2["default"].PropTypes.oneOf(["g", "svg"])
+	      standalone: _react2["default"].PropTypes.bool
 	    },
 	    enumerable: true
 	  }, {
@@ -240,7 +237,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      symbol: "circle",
 	      scale: _d32["default"].scale.linear(),
 	      showLabels: true,
-	      containerElement: "svg"
+	      standalone: true
 	    },
 	    enumerable: true
 	  }]);
@@ -266,11 +263,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _props$style = props.style;
 	      var data = _props$style.data;
 	      var labels = _props$style.labels;
-	
-	      var base = _objectWithoutProperties(_props$style, ["data", "labels"]);
+	      var parent = _props$style.parent;
 	
 	      return {
-	        base: _lodash2["default"].merge({}, styles.base, base),
+	        parent: _lodash2["default"].merge({}, styles.parent, parent),
 	        labels: _lodash2["default"].merge({}, styles.labels, labels),
 	        data: _lodash2["default"].merge({}, styles.data, data)
 	      };
@@ -316,7 +312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return props.range[axis] ? props.range[axis] : props.range;
 	      }
 	      // if the range is not given in props, calculate it from width, height and margin
-	      var style = this.style.base;
+	      var style = this.style.parent;
 	      return axis === "x" ? [style.margin, style.width - style.margin] : [style.height - style.margin, style.margin];
 	    }
 	  }, {
@@ -373,7 +369,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var data = this.props.data;
 	      var zMin = _lodash2["default"].min(_lodash2["default"].pluck(data, z));
 	      var zMax = _lodash2["default"].max(_lodash2["default"].pluck(data, z));
-	      var maxRadius = this.props.maxBubbleSize || _lodash2["default"].max([this.style.base.margin, 5]);
+	      var maxRadius = this.props.maxBubbleSize || _lodash2["default"].max([this.style.parent.margin, 5]);
 	      var maxArea = Math.PI * Math.pow(maxRadius, 2);
 	      var area = (datum[z] - zMin) / (zMax - zMin) * maxArea;
 	      var radius = Math.sqrt(area / Math.PI);
@@ -448,16 +444,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: "render",
 	    value: function render() {
-	      if (this.props.containerElement === "svg") {
+	      if (this.props.standalone === true) {
 	        return _react2["default"].createElement(
 	          "svg",
-	          { style: this.style.base },
+	          { style: this.style.parent },
 	          this.plotDataPoints()
 	        );
 	      }
 	      return _react2["default"].createElement(
 	        "g",
-	        { style: this.style.base },
+	        { style: this.style.parent },
 	        this.plotDataPoints()
 	      );
 	    }
@@ -497,7 +493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Do less work by having `VictoryAnimation` tween only values that
 	        // make sense to tween. In the future, allow customization of animated
 	        // prop whitelist/blacklist?
-	        var animateData = _lodash2["default"].omit(this.props, ["animate", "scale", "showLabels", "containerElement"]);
+	        var animateData = _lodash2["default"].omit(this.props, ["animate", "scale", "showLabels", "standalone"]);
 	        return _react2["default"].createElement(
 	          _victoryAnimation.VictoryAnimation,
 	          _extends({}, this.props.animate, { data: animateData }),
