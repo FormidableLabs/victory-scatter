@@ -180,6 +180,7 @@ class VScatter extends React.Component {
       x: this.getScale(props, "x"),
       y: this.getScale(props, "y")
     };
+    this.data = this.props.data || this.getMockData();
   }
 
   getScale(props, axis) {
@@ -259,7 +260,7 @@ class VScatter extends React.Component {
   }
 
   getBubbleSize(datum, z) {
-    const data = this.props.data;
+    const data = this.data;
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
     const maxRadius = this.props.maxBubbleSize || _.max([this.style.parent.margin, 5]);
@@ -325,7 +326,7 @@ class VScatter extends React.Component {
   }
 
   plotDataPoints() {
-    const data = this.props.data || this.getMockData();
+    const data = this.data;
     return _.map(data, (dataPoint, index) => {
       return this.getPathElement(dataPoint, index);
     });
