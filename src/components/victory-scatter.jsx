@@ -29,7 +29,6 @@ const styles = {
 
 @Radium
 export default class VictoryScatter extends React.Component {
-  static role = "scatter";
   static propTypes = {
     /**
      * The data prop specifies the data to be plotted. Data should be in the form of an array
