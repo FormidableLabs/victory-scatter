@@ -27,7 +27,8 @@ const styles = {
   }
 };
 
-class VScatter extends React.Component {
+@Radium
+export default class VictoryScatter extends React.Component {
   static propTypes = {
     /**
      * The data prop specifies the data to be plotted. Data should be in the form of an array
@@ -145,6 +146,26 @@ class VScatter extends React.Component {
     standalone: true
   };
 
+  render() {
+    if (this.props.animate) {
+      // Do less work by having `VictoryAnimation` tween only values that
+      // make sense to tween. In the future, allow customization of animated
+      // prop whitelist/blacklist?
+      const animateData = _.omit(this.props, [
+        "animate", "scale", "showLabels", "standalone"
+      ]);
+      return (
+        <VictoryAnimation {...this.props.animate} data={animateData}>
+          {props => <VScatter {...this.props} {...props}/>}
+        </VictoryAnimation>
+      );
+    }
+    return (<VScatter {...this.props}/>);
+  }
+}
+
+class VScatter extends React.Component {
+  /* eslint-disable react/prop-types */
   constructor(props) {
     super(props);
     this.getCalculatedValues(props);
@@ -180,6 +201,7 @@ class VScatter extends React.Component {
       x: this.getScale(props, "x"),
       y: this.getScale(props, "y")
     };
+    this.data = this.props.data || this.getMockData();
   }
 
   getScale(props, axis) {
@@ -259,7 +281,7 @@ class VScatter extends React.Component {
   }
 
   getBubbleSize(datum, z) {
-    const data = this.props.data;
+    const data = this.data;
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
     const maxRadius = this.props.maxBubbleSize || _.max([this.style.parent.margin, 5]);
@@ -325,7 +347,7 @@ class VScatter extends React.Component {
   }
 
   plotDataPoints() {
-    const data = this.props.data || this.getMockData();
+    const data = this.data;
     return _.map(data, (dataPoint, index) => {
       return this.getPathElement(dataPoint, index);
     });
@@ -340,34 +362,5 @@ class VScatter extends React.Component {
     return (
       <g style={this.style.parent}>{this.plotDataPoints()}</g>
     );
-  }
-}
-
-@Radium
-export default class VictoryScatter extends React.Component {
-  /* eslint-disable react/prop-types */
-  // ^ see: https://github.com/yannickcr/eslint-plugin-react/issues/106
-  static propTypes = {...VScatter.propTypes};
-  static defaultProps = {...VScatter.defaultProps};
-
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    if (this.props.animate) {
-      // Do less work by having `VictoryAnimation` tween only values that
-      // make sense to tween. In the future, allow customization of animated
-      // prop whitelist/blacklist?
-      const animateData = _.omit(this.props, [
-        "animate", "scale", "showLabels", "standalone"
-      ]);
-      return (
-        <VictoryAnimation {...this.props.animate} data={animateData}>
-          {props => <VScatter {...this.props} {...props}/>}
-        </VictoryAnimation>
-      );
-    }
-    return (<VScatter {...this.props}/>);
   }
 }
