@@ -48,6 +48,29 @@ export default class VictoryScatter extends React.Component {
       })
     ),
     /**
+     * The x props provides another way to supply data for scatter to plot. This prop can be given
+     * as an array of values, and it will be plotted against whatever y prop is provided. If no
+     * props are provided for y, the values in x will be plotted as the identity function (x) => x.
+     * @examples [1, 2, 3]
+     */
+    x: React.PropTypes.array,
+    /**
+     * The y props provides another way to supply data for scatter to plot. This prop can be given
+     * as a function of x, or an array of values. If x props are given, they will be used
+     * in plotting (x, y) data points. If x props are not provided, a set of x values
+     * evenly spaced across the x domain will be calculated, and used for plotting data points.
+     * @examples (x) => Math.sin(x), [1, 2, 3]
+     */
+    y: React.PropTypes.oneOfType([
+      React.PropTypes.array,
+      React.PropTypes.func
+    ]),
+    /**
+     * The samples prop specifies how many individual points to plot when plotting
+     * y as a function of x. Samples is ignored if x props are provided instead.
+     */
+    samples: React.PropTypes.number,
+    /**
      * The domain prop describes the range of values your chart will include. This prop can be
      * given as a array of the minimum and maximum expected values for your chart,
      * or as an object that specifies separate arrays for x and y.
@@ -143,7 +166,9 @@ export default class VictoryScatter extends React.Component {
     symbol: "circle",
     scale: d3.scale.linear(),
     showLabels: true,
-    standalone: true
+    standalone: true,
+    samples: 50,
+    y: (x) => x
   };
 
   render() {
@@ -201,7 +226,7 @@ class VScatter extends React.Component {
       x: this.getScale(props, "x"),
       y: this.getScale(props, "y")
     };
-    this.data = this.props.data || this.getMockData();
+    this.data = this.getData(props);
   }
 
   getScale(props, axis) {
@@ -262,6 +287,46 @@ class VScatter extends React.Component {
     return scaleDomain;
   }
 
+  getData(props) {
+    if (props.data) {
+      return props.data;
+    }
+    const x = this.returnOrGenerateX(props);
+    const y = this.returnOrGenerateY(props, x);
+    const n = _.min([x.length, y.length]);
+    // create a dataset from x and y with n points
+    const dataset = _.zip(_.take(x, n), _.take(y, n));
+    // return data as an array of objects
+    return _.map(dataset, (point) => {
+      return {x: point[0], y: point[1]};
+    });
+  }
+
+  returnOrGenerateX(props) {
+    if (props.x) {
+      return props.x;
+    }
+    // if x is not given in props, create an array of values evenly
+    // spaced across the x domain
+    const domain = this.domain.x;
+    const samples = _.isArray(props.y) ? props.y.length : props.samples;
+    const step = _.max(domain) / samples;
+    // return an array of x values spaced across the domain,
+    // include the maximum of the domain
+    return _.union(_.range(_.min(domain), _.max(domain), step), [_.max(domain)]);
+  }
+
+  returnOrGenerateY(props, x) {
+    if (_.isFunction(props.y)) {
+      // if y is a function, apply the function y to to each value of the array x,
+      // and return the results as an array
+      return _.map(x, (datum) => props.y(datum));
+    }
+    // y is either a function or an array, and is never undefined
+    // if it isn't a function, just return it.
+    return props.y;
+  }
+
   getSymbol(data) {
     if (this.props.bubbleProperty) {
       return "circle";
@@ -289,20 +354,6 @@ class VScatter extends React.Component {
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
     return _.max([radius, 1]);
-  }
-
-  getMockData() {
-    const samples = 20;
-    const domain = {
-      x: this.domain.x,
-      y: this.domain.y
-    };
-    return _.map(_.range(samples), (index) => {
-      return {
-        x: (_.max(domain.x) - _.min(domain.x)) / samples * (index + 1),
-        y: (_.max(domain.y) - _.min(domain.y)) / samples * (index + 1)
-      };
-    });
   }
 
   getPathElement(data, index) {
