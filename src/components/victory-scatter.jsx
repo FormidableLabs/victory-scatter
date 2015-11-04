@@ -171,26 +171,6 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
-  render() {
-    if (this.props.animate) {
-      // Do less work by having `VictoryAnimation` tween only values that
-      // make sense to tween. In the future, allow customization of animated
-      // prop whitelist/blacklist?
-      const animateData = _.omit(this.props, [
-        "animate", "scale", "showLabels", "standalone"
-      ]);
-      return (
-        <VictoryAnimation {...this.props.animate} data={animateData}>
-          {props => <VScatter {...this.props} {...props}/>}
-        </VictoryAnimation>
-      );
-    }
-    return (<VScatter {...this.props}/>);
-  }
-}
-
-class VScatter extends React.Component {
-  /* eslint-disable react/prop-types */
   constructor(props) {
     super(props);
     this.getCalculatedValues(props);
@@ -405,6 +385,24 @@ class VScatter extends React.Component {
   }
 
   render() {
+    // If animating, return a `VictoryAnimation` element that will create
+    // a new `VictoryScatter` with nearly identical props, except (1) tweened
+    // and (2) `animate` set to null so we don't recurse forever.
+    if (this.props.animate) {
+      // Do less work by having `VictoryAnimation` tween only values that
+      // make sense to tween. In the future, allow customization of animated
+      // prop whitelist/blacklist?
+      const animateData = _.omit(this.props, [
+        "animate", "scale", "showLabels", "standalone"
+      ]);
+
+      return (
+        <VictoryAnimation {...this.props.animate} data={animateData}>
+          {props => <VictoryScatter {...this.props} {...props} animate={null}/>}
+        </VictoryAnimation>
+      );
+    }
+
     if (this.props.standalone === true) {
       return (
         <svg style={this.style.parent}>{this.plotDataPoints()}</svg>
