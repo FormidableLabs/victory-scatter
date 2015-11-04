@@ -124,7 +124,7 @@ export default class VictoryScatter extends React.Component {
      * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
      * so valid Radium style objects should work for this prop, however height, width, and margin
      * are used to calculate range, and need to be expressed as a number of pixels
-     * @example {parent: {width: 300, margin: 50}, data: {fill: "red", opacity, 0.8}, labels: {padding: 20}}
+     * @example {parent: {width: 300, margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
      */
     style: React.PropTypes.object,
     /**
