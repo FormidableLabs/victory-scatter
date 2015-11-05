@@ -7,7 +7,7 @@ import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
 const styles = {
-  base: {
+  parent: {
     width: 500,
     height: 300,
     margin: 50
