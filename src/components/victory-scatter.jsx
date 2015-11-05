@@ -5,7 +5,7 @@ import d3 from "d3";
 import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
-const styles = {
+const defaultStyles = {
   data: {
     fill: "#756f6a",
     opacity: 1,
@@ -208,11 +208,12 @@ export default class VictoryScatter extends React.Component {
   }
 
   getStyles(props) {
-    const {data, labels, parent} = props.style;
+    const style = props.style || defaultStyles;
+    const {data, labels, parent} = style;
     return {
       parent: _.merge({height: props.height, width: props.width}, parent),
-      labels: _.merge({}, styles.labels, labels),
-      data: _.merge({}, styles.data, data)
+      labels: _.merge({}, defaultStyles.labels, labels),
+      data: _.merge({}, defaultStyles.data, data)
     };
   }
 
