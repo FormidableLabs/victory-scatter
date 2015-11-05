@@ -408,14 +408,8 @@ export default class VictoryScatter extends React.Component {
         </VictoryAnimation>
       );
     }
-
-    if (this.props.standalone === true) {
-      return (
-        <svg style={this.style.parent}>{this.plotDataPoints()}</svg>
-      );
-    }
-    return (
-      <g style={this.style.parent}>{this.plotDataPoints()}</g>
-    );
+    const style = this.style.parent;
+    const group = <g style={style}>{this.plotDataPoints()}</g>;
+    return this.props.standalone ? <svg style={style}>{group}</svg> : group;
   }
 }
