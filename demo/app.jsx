@@ -29,18 +29,14 @@ const getData = function () {
 const style = {
   parent: {
     border: "1px solid #ccc",
-    height: 500,
-    margin: 20,
-    width: 500
+    margin: 20
   }
 };
 
 const symbolStyle = {
   parent: {
     border: "1px solid #ccc",
-    height: 500,
-    margin: 50,
-    width: 500
+    margin: 20
   },
   data: {
     fill: "red"
@@ -74,11 +70,16 @@ class App extends React.Component {
       <div>
         <VictoryScatter
           style={style}
+          width={500}
+          height={500}
           domain={[0, 600]}
           animate={{velocity: 0.03}}
           data={this.state.data}/>
 
         <VictoryScatter
+          width={500}
+          height={500}
+          padding={50}
           style={symbolStyle}
           data={symbolData}/>
 
@@ -93,8 +94,10 @@ class App extends React.Component {
           showLabels={false}
           data={bubbleData}/>
 
-        <svg style={style.parent}>
+        <svg style={_.merge({width: 500, height: 300}, style.parent)}>
           <VictoryScatter
+            width={500}
+            height={300}
             style={style}
             containerElement="g"/>
         </svg>
