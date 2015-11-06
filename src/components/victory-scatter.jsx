@@ -2,16 +2,10 @@ import React from "react";
 import Radium from "radium";
 import _ from "lodash";
 import d3 from "d3";
-import log from "../log";
 import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
 
-const styles = {
-  parent: {
-    width: 500,
-    height: 300,
-    margin: 50
-  },
+const defaultStyles = {
   data: {
     fill: "#756f6a",
     opacity: 1,
@@ -27,9 +21,23 @@ const styles = {
   }
 };
 
+const defaultPadding = 30;
+
 @Radium
 export default class VictoryScatter extends React.Component {
   static propTypes = {
+    /**
+     * The animate prop specifies props for victory-animation to use. It this prop is
+     * not given, the scatter plot will not tween between changing data / style props.
+     * Large datasets might animate slowly due to the inherent limits of svg rendering.
+     * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
+     */
+    animate: React.PropTypes.object,
+    /**
+     * The bubbleProperty prop indicates which property of the data object should be used
+     * to scale data points in a bubble chart
+     */
+    bubbleProperty: React.PropTypes.string,
     /**
      * The data prop specifies the data to be plotted. Data should be in the form of an array
      * of data points where each data point should be an object with x and y properties.
@@ -48,6 +56,95 @@ export default class VictoryScatter extends React.Component {
       })
     ),
     /**
+     * The domain prop describes the range of values your chart will include. This prop can be
+     * given as a array of the minimum and maximum expected values for your chart,
+     * or as an object that specifies separate arrays for x and y.
+     * If this prop is not provided, a domain will be calculated from data, or other
+     * available information.
+     * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+     */
+    domain: React.PropTypes.oneOfType([
+      React.PropTypes.array,
+      React.PropTypes.shape({
+        x: React.PropTypes.array,
+        y: React.PropTypes.array
+      })
+    ]),
+    /**
+     * The height props specifies the height of the chart container element in pixels
+     */
+    height: React.PropTypes.number,
+    /**
+     * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
+     */
+    maxBubbleSize: React.PropTypes.number,
+    /**
+     * The padding props specifies the amount of padding in number of pixels between
+     * the edge of the chart and any rendered child components. This prop can be given
+     * as a number or as an object with padding specified for top, bottom, left
+     * and right.
+     */
+    padding: React.PropTypes.oneOfType([
+      React.PropTypes.number,
+      React.PropTypes.shape({
+        top: React.PropTypes.number,
+        bottom: React.PropTypes.number,
+        left: React.PropTypes.number,
+        right: React.PropTypes.number
+      })
+    ]),
+    /**
+     * The samples prop specifies how many individual points to plot when plotting
+     * y as a function of x. Samples is ignored if x props are provided instead.
+     */
+    samples: React.PropTypes.number,
+    /**
+     * The scale prop determines which scales your chart should use. This prop can be
+     * given as a function, or as an object that specifies separate functions for x and y.
+     * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
+     */
+    scale: React.PropTypes.oneOfType([
+      React.PropTypes.func,
+      React.PropTypes.shape({
+        x: React.PropTypes.func,
+        y: React.PropTypes.func
+      })
+    ]),
+    /**
+     * The showLabels prop determines whether to show any labels associated with a data point.
+     * Large datasets might animate slowly due to the inherent limits of svg rendering.
+     * If animations are running slowly, try setting this prop to false to cut down on
+     * the number of svg nodes
+     */
+    showLabels: React.PropTypes.bool,
+    /**
+     * The size prop determines how to scale each data point
+     */
+    size: React.PropTypes.number,
+    /**
+     * The standalone prop determines whether the component will render a standalone svg
+     * or a <g> tag that will be included in an external svg. Set standalone to false to
+     * compose VictoryScatter with other components within an enclosing <svg> tag.
+     */
+    standalone: React.PropTypes.bool,
+    /**
+     * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
+     * so valid Radium style objects should work for this prop, however height, width, and margin
+     * are used to calculate range, and need to be expressed as a number of pixels
+     * @example {parent: {width: 300, margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
+     */
+    style: React.PropTypes.object,
+    /**
+     * The symbol prop determines which symbol should be drawn to represent data points.
+     */
+    symbol: React.PropTypes.oneOf([
+      "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+    ]),
+    /**
+     * The width props specifies the width of the chart container element in pixels
+     */
+    width: React.PropTypes.number,
+    /**
      * The x prop provides another way to supply data for scatter to plot. This prop can be given
      * as an array of values, and it will be plotted against whatever y prop is provided. If no
      * props are provided for y, the values in x will be plotted as the identity function (x) => x.
@@ -64,110 +161,19 @@ export default class VictoryScatter extends React.Component {
     y: React.PropTypes.oneOfType([
       React.PropTypes.array,
       React.PropTypes.func
-    ]),
-    /**
-     * The samples prop specifies how many individual points to plot when plotting
-     * y as a function of x. Samples is ignored if x props are provided instead.
-     */
-    samples: React.PropTypes.number,
-    /**
-     * The domain prop describes the range of values your chart will include. This prop can be
-     * given as a array of the minimum and maximum expected values for your chart,
-     * or as an object that specifies separate arrays for x and y.
-     * If this prop is not provided, a domain will be calculated from data, or other
-     * available information.
-     * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
-     */
-    domain: React.PropTypes.oneOfType([
-      React.PropTypes.array,
-      React.PropTypes.shape({
-        x: React.PropTypes.array,
-        y: React.PropTypes.array
-      })
-    ]),
-    /**
-     * The range prop describes the range of pixels your chart will cover. This prop can be
-     * given as a array of the minimum and maximum expected values for your chart,
-     * or as an object that specifies separate arrays for x and y.
-     * If this prop is not provided, a range will be calculated based on the height,
-     * width, and margin provided in the style prop, or in default styles. It is usually
-     * a good idea to let the chart component calculate its own range.
-     * @exampes [0, 500], {x: [0, 500], y: [500, 300]}
-     */
-    range: React.PropTypes.oneOfType([
-      React.PropTypes.array,
-      React.PropTypes.shape({
-        x: React.PropTypes.array,
-        y: React.PropTypes.array
-      })
-    ]),
-    /**
-     * The scale prop determines which scales your chart should use. This prop can be
-     * given as a function, or as an object that specifies separate functions for x and y.
-     * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
-     */
-    scale: React.PropTypes.oneOfType([
-      React.PropTypes.func,
-      React.PropTypes.shape({
-        x: React.PropTypes.func,
-        y: React.PropTypes.func
-      })
-    ]),
-   /**
-     * The animate prop specifies props for victory-animation to use. It this prop is
-     * not given, the scatter plot will not tween between changing data / style props.
-     * Large datasets might animate slowly due to the inherent limits of svg rendering.
-     * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
-     */
-    animate: React.PropTypes.object,
-    /**
-     * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
-     * so valid Radium style objects should work for this prop, however height, width, and margin
-     * are used to calculate range, and need to be expressed as a number of pixels
-     * @example {parent: {width: 300, margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
-     */
-    style: React.PropTypes.object,
-    /**
-     * The size prop determines how to scale each data point
-     */
-    size: React.PropTypes.number,
-    /**
-     * The symbol prop determines which symbol should be drawn to represent data points.
-     */
-    symbol: React.PropTypes.oneOf([
-      "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
-    ]),
-    /**
-     * The bubbleProperty prop indicates which property of the data object should be used
-     * to scale data points in a bubble chart
-     */
-    bubbleProperty: React.PropTypes.string,
-    /**
-     * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
-     */
-    maxBubbleSize: React.PropTypes.number,
-    /**
-     * The showLabels prop determines whether to show any labels associated with a data point.
-     * Large datasets might animate slowly due to the inherent limits of svg rendering.
-     * If animations are running slowly, try setting this prop to false to cut down on
-     * the number of svg nodes
-     */
-    showLabels: React.PropTypes.bool,
-    /**
-     * The standalone prop determines whether the component will render a standalone svg
-     * or a <g> tag that will be included in an external svg. Set standalone to false to
-     * compose VictoryScatter with other components within an enclosing <svg> tag.
-     */
-    standalone: React.PropTypes.bool
+    ])
   };
 
   static defaultProps = {
-    size: 3,
-    symbol: "circle",
+    height: 300,
+    padding: 30,
+    samples: 50,
     scale: d3.scale.linear(),
     showLabels: true,
+    size: 3,
     standalone: true,
-    samples: 50,
+    symbol: "circle",
+    width: 500,
     y: (x) => x
   };
 
@@ -183,20 +189,9 @@ export default class VictoryScatter extends React.Component {
     this.getCalculatedValues(nextProps);
   }
 
-  getStyles(props) {
-    if (!props.style) {
-      return styles;
-    }
-    const {data, labels, parent} = props.style;
-    return {
-      parent: _.merge({}, styles.parent, parent),
-      labels: _.merge({}, styles.labels, labels),
-      data: _.merge({}, styles.data, data)
-    };
-  }
-
   getCalculatedValues(props) {
     this.style = this.getStyles(props);
+    this.padding = this.getPadding(props);
     this.range = {
       x: this.getRange(props, "x"),
       y: this.getRange(props, "y")
@@ -212,6 +207,26 @@ export default class VictoryScatter extends React.Component {
     this.data = this.getData(props);
   }
 
+  getStyles(props) {
+    const style = props.style || defaultStyles;
+    const {data, labels, parent} = style;
+    return {
+      parent: _.merge({height: props.height, width: props.width}, parent),
+      labels: _.merge({}, defaultStyles.labels, labels),
+      data: _.merge({}, defaultStyles.data, data)
+    };
+  }
+
+  getPadding(props) {
+    const padding = _.isNumber(props.padding) ? props.padding : defaultPadding;
+    return {
+      top: props.padding.top || padding,
+      bottom: props.padding.bottom || padding,
+      left: props.padding.left || padding,
+      right: props.padding.right || padding
+    };
+  }
+
   getScale(props, axis) {
     const scale = props.scale[axis] ? props.scale[axis].copy() :
       props.scale.copy();
@@ -219,26 +234,14 @@ export default class VictoryScatter extends React.Component {
     const domain = this.domain[axis];
     scale.range(range);
     scale.domain(domain);
-    // hacky check for identity scale
-    if (_.difference(scale.range(), range).length !== 0) {
-      // identity scale, reset the domain and range
-      scale.range(range);
-      scale.domain(range);
-      log.warn("Identity Scale: domain and range must be identical. " +
-        "Domain has been reset to match range.");
-    }
     return scale;
   }
 
   getRange(props, axis) {
-    if (props.range) {
-      return props.range[axis] ? props.range[axis] : props.range;
-    }
     // if the range is not given in props, calculate it from width, height and margin
-    const style = this.style.parent;
     return axis === "x" ?
-      [style.margin, style.width - style.margin] :
-      [style.height - style.margin, style.margin];
+      [this.padding.left, props.width - this.padding.right] :
+      [props.height - this.padding.bottom, this.padding.top];
   }
 
   getDomain(props, axis) {
@@ -250,24 +253,7 @@ export default class VictoryScatter extends React.Component {
         _.max(_.pluck(props.data, axis))
       ];
     }
-    return this._getDomainFromScale(props, axis);
-  }
-
-  // helper method for getDomain
-  _getDomainFromScale(props, axis) {
-    // The scale will never be undefined due to default props
-    const scaleDomain = props.scale[axis] ? props.scale[axis].domain() :
-      props.scale.domain();
-
-    // Warn when particular types of scales need more information to produce meaningful lines
-    if (_.isDate(scaleDomain[0])) {
-      log.warn("please specify a domain or data when using time scales");
-    } else if (scaleDomain.length === 0) {
-      log.warn("please specify a domain or data when using ordinal or quantile scales");
-    } else if (scaleDomain.length === 1) {
-      log.warn("please specify a domain or data when using a threshold scale");
-    }
-    return scaleDomain;
+    return props.scale[axis] ? props.scale[axis].domain() : props.scale.domain();
   }
 
   getData(props) {
@@ -332,7 +318,7 @@ export default class VictoryScatter extends React.Component {
     const data = this.data;
     const zMin = _.min(_.pluck(data, z));
     const zMax = _.max(_.pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || _.max([this.style.parent.margin, 5]);
+    const maxRadius = this.props.maxBubbleSize || _.max([_.min(_.values(this.padding)), 5]);
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
