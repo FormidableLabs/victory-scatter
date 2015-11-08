@@ -2,8 +2,10 @@ import React from "react";
 import Radium from "radium";
 import _ from "lodash";
 import d3 from "d3";
-import {VictoryAnimation} from "victory-animation";
 import pathHelpers from "../path-helpers";
+import {VictoryAnimation} from "victory-animation";
+import {VictoryLabel} from "victory-label";
+
 
 const defaultStyles = {
   data: {
@@ -72,6 +74,11 @@ export default class VictoryScatter extends React.Component {
      * The height props specifies the height of the chart container element in pixels
      */
     height: React.PropTypes.number,
+    /**
+     * The labelComponent prop takes in an entire, HTML-complete label component
+     * which will be used to create labels for scatter to use
+     */
+    labelComponent: React.PropTypes.element,
     /**
      * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
      */
@@ -324,6 +331,40 @@ export default class VictoryScatter extends React.Component {
     return _.max([radius, 1]);
   }
 
+  getLabelStyle(data) {
+    const size = this.getSize(data);
+    // match labels styles to data style by default (fill, opacity, others?)
+    const opacity = data.opacity || this.style.data.opacity;
+    // match label color to data color if it is not given.
+    const fill = data.fill || this.style.data.fill;
+    const padding = this.style.labels.padding || size * 0.25;
+    return _.merge({opacity, fill, padding}, this.style.labels);
+  }
+
+  getLabel(position, data, index) {
+    const component = this.props.labelComponent;
+    const labelStyle = this.getLabelStyle(data);
+    const componentStyle = component && component.props.style || {};
+    const style = _.merge({}, labelStyle, componentStyle);
+    const defaultDy = (!component || !component.verticalAnchor) ? style.padding : undefined;
+    const children = component && component.props.children || data.label;
+    const props = {
+      key: "label-" + index,
+      x: component && component.props.x || position.x,
+      y: component && component.props.y || position.y,
+      dy: component && component.props.dy || defaultDy * -1,
+      data, // Pass data for custom label component to access
+      textAnchor: component && component.props.textAnchor || style.textAnchor,
+      verticalAnchor: component && component.props.verticalAnchor,
+      style
+    };
+
+    return component ?
+      React.cloneElement(component, props, children) :
+      React.createElement(VictoryLabel, props, children);
+  }
+
+
   getPathElement(data, index) {
     const pathFunctions = {
       circle: pathHelpers.circle,
@@ -334,11 +375,13 @@ export default class VictoryScatter extends React.Component {
       plus: pathHelpers.plus,
       star: pathHelpers.star
     };
-    const x = this.scale.x.call(this, data.x);
-    const y = this.scale.y.call(this, data.y);
+    const position = {
+      x: this.scale.x.call(this, data.x),
+      y: this.scale.y.call(this, data.y)
+    };
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
-    const path = pathFunctions[symbol].call(this, x, y, size);
+    const path = pathFunctions[symbol].call(this, position.x, position.y, size);
     const styleData = _.omit(data, [
         "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
       ]);
@@ -353,15 +396,9 @@ export default class VictoryScatter extends React.Component {
     );
     if (data.label && this.props.showLabels) {
       return (
-        <g key={"label-" + index}>
+        <g key={"data-label-" + index}>
           {pathElement}
-          <text
-            x={x}
-            y={y}
-            dy={-this.style.labels.padding || size * -1.25}
-            style={this.style.labels}>
-            {data.label}
-          </text>
+          {this.getLabel(position, data, index)}
         </g>
       );
     }

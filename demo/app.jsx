@@ -5,6 +5,7 @@ import ReactDOM from "react-dom";
 import Radium from "radium";
 import _ from "lodash";
 import {VictoryScatter} from "../src/index";
+import {VictoryLabel} from "victory-label";
 import bubbleData from "./bubble-data.js";
 import symbolData from "./symbol-data.js";
 
@@ -43,7 +44,6 @@ const symbolStyle = {
   },
   labels: {
     fontSize: 15,
-    padding: 20,
     fill: "grey"
   }
 };
@@ -80,6 +80,7 @@ class App extends React.Component {
           width={500}
           height={500}
           padding={50}
+          labelComponent={<VictoryLabel style={{fill: "red"}}/>}
           style={symbolStyle}
           data={symbolData}/>
 
