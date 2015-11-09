@@ -343,9 +343,8 @@ export default class VictoryScatter extends React.Component {
 
   getLabel(position, data, index) {
     const component = this.props.labelComponent;
-    const labelStyle = this.getLabelStyle(data);
     const componentStyle = component && component.props.style || {};
-    const style = _.merge({}, labelStyle, componentStyle);
+    const style = _.merge({}, this.getLabelStyle(data), componentStyle);
     const defaultDy = (!component || !component.verticalAnchor) ? style.padding : undefined;
     const children = component && component.props.children || data.label;
     const props = {
