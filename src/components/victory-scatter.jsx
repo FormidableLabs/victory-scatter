@@ -25,6 +25,7 @@ const defaultStyles = {
 
 @Radium
 export default class VictoryScatter extends React.Component {
+  static role = "scatter";
   static propTypes = {
     /**
      * The animate prop specifies props for victory-animation to use. It this prop is
