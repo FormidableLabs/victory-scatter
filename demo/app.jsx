@@ -78,7 +78,10 @@ class App extends React.Component {
 
         <VictoryScatter
           style={style}
-          y={(x) => Math.sin(2 * Math.PI * x)}/>
+          width={500}
+          height={500}
+          y={(x) => Math.sin(2 * Math.PI * x)}
+          sample={25}/>
 
         <VictoryScatter
           width={500}
@@ -94,6 +97,8 @@ class App extends React.Component {
             style,
             {data: {fill: "blue", opacity: 0.7}}
           )}
+          width={500}
+          height={500}
           bubbleProperty="z"
           maxBubbleSize={20}
           showLabels={false}
