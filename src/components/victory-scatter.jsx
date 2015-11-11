@@ -179,7 +179,7 @@ export default class VictoryScatter extends React.Component {
     size: 3,
     standalone: true,
     symbol: "circle",
-    width: 500,
+    width: 450,
     y: (x) => x
   };
 

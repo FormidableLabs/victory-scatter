@@ -77,6 +77,10 @@ class App extends React.Component {
           data={this.state.data}/>
 
         <VictoryScatter
+          style={style}
+          y={(x) => Math.sin(2 * Math.PI * x)}/>
+
+        <VictoryScatter
           width={500}
           height={500}
           padding={50}
