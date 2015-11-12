@@ -19,7 +19,8 @@ const defaultStyles = {
     fill: "#756f6a",
     fontFamily: "Helvetica",
     fontSize: 10,
-    textAnchor: "middle"
+    textAnchor: "middle",
+    padding: 5
   }
 };
 
@@ -31,7 +32,7 @@ export default class VictoryScatter extends React.Component {
      * The animate prop specifies props for victory-animation to use. It this prop is
      * not given, the scatter plot will not tween between changing data / style props.
      * Large datasets might animate slowly due to the inherent limits of svg rendering.
-     * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
+     * @examples {delay: 5, velocity: 0.02, onEnd: () => alert("woo!")}
      */
     animate: React.PropTypes.object,
     /**
@@ -44,11 +45,7 @@ export default class VictoryScatter extends React.Component {
      * of data points where each data point should be an object with x and y properties.
      * Other properties may be added to the data point object, such as fill, size, and symbol.
      * These properties will be interpreted and applied to the individual lines
-     * @exampes [
-     *   {x: 1, y: 125, fill: "red", symbol: "triangleUp", label: "foo"},
-     *   {x: 10, y: 257, fill: "blue", symbol: "triangleDown", label: "bar"},
-     *   {x: 100, y: 345, fill: "green", symbol: "diamond", label: "baz"},
-     * ]
+     * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
      */
     data: React.PropTypes.arrayOf(
       React.PropTypes.shape({
@@ -62,7 +59,7 @@ export default class VictoryScatter extends React.Component {
      * or as an object that specifies separate arrays for x and y.
      * If this prop is not provided, a domain will be calculated from data, or other
      * available information.
-     * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+     * @examples [-1, 1], {x: [0, 100], y: [0, 1]}
      */
     domain: React.PropTypes.oneOfType([
       React.PropTypes.array,
@@ -134,10 +131,11 @@ export default class VictoryScatter extends React.Component {
      */
     standalone: React.PropTypes.bool,
     /**
-     * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
-     * so valid Radium style objects should work for this prop, however height, width, and margin
-     * are used to calculate range, and need to be expressed as a number of pixels
-     * @example {parent: {width: 300, margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
+     * The style prop specifies styles for your scatter plot. VictoryScatter relies on Radium,
+     * so valid Radium style objects should work for this prop. Height, width, and
+     * padding should be specified via the height, width, and padding props, as they
+     * are used to calculate the alignment of components within chart.
+     * @examples {parent: {margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
      */
     style: React.PropTypes.object,
     /**
@@ -153,7 +151,7 @@ export default class VictoryScatter extends React.Component {
     /**
      * The x prop provides another way to supply data for scatter to plot. This prop can be given
      * as an array of values, and it will be plotted against whatever y prop is provided. If no
-     * props are provided for y, the values in x will be plotted as the identity function (x) => x.
+     * props are provided for y, the values in x will be plotted as the identity function.
      * @examples [1, 2, 3]
      */
     x: React.PropTypes.array,
@@ -172,14 +170,14 @@ export default class VictoryScatter extends React.Component {
 
   static defaultProps = {
     height: 300,
-    padding: 30,
+    padding: 50,
     samples: 50,
     scale: d3.scale.linear(),
     showLabels: true,
     size: 3,
     standalone: true,
     symbol: "circle",
-    width: 500,
+    width: 450,
     y: (x) => x
   };
 
@@ -349,16 +347,15 @@ export default class VictoryScatter extends React.Component {
     const component = this.props.labelComponent;
     const componentStyle = component && component.props.style || {};
     const style = _.merge({}, this.getLabelStyle(data), componentStyle);
-    const defaultDy = (!component || !component.verticalAnchor) ? style.padding : undefined;
     const children = component && component.props.children || data.label;
     const props = {
       key: "label-" + index,
       x: component && component.props.x || position.x,
-      y: component && component.props.y || position.y,
-      dy: component && component.props.dy || defaultDy * -1,
+      y: component && component.props.y || position.y - style.padding,
+      dy: component && component.props.dy,
       data, // Pass data for custom label component to access
       textAnchor: component && component.props.textAnchor || style.textAnchor,
-      verticalAnchor: component && component.props.verticalAnchor,
+      verticalAnchor: component && component.props.verticalAnchor || "end",
       style
     };
 
