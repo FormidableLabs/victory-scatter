@@ -1,7 +1,7 @@
 Victory Scatter
 =============
 
-VictoryScatter creates a scatter of points from data. Scatter is a composable component, so it does not include an axis.  Check out Victory Chart for easy to use scatter plots and more.
+VictoryScatter creates a scatter of points from data. VictoryScatter is a composable component, so it does not include an axis.  Check out [VictoryChart](https://github.com/formidablelabs/victory-chart) for easy to use scatter plots and more.
 
 ## Features
 
