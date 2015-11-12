@@ -43,6 +43,7 @@ const symbolStyle = {
     fill: "red"
   },
   labels: {
+    padding: 25,
     fontSize: 15,
     fill: "grey"
   }

@@ -1,9 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Ecology from 'ecology';
-import Radium, { Style } from 'radium';
-
-import theme from './theme';
+import Ecology from "ecology";
+import _ from "lodash";
+import Radium, { Style } from "radium";
+import React from "react";
+import ReactDOM from "react-dom";
+import symbolData from "./symbol-data"
+import theme from "./theme";
 
 @Radium
 class Docs extends React.Component {
@@ -12,10 +13,16 @@ class Docs extends React.Component {
       <div className="Container">
         <div className="Copy">
           <Ecology
-            overview={require('!!raw!./ecology.md')}
-            source={require('json!./victory-scatter.json')}
-            scope={{React, ReactDOM, VictoryScatter: require('../src/components/victory-scatter')}}
-            playgroundtheme='elegant' />
+            overview={require("!!raw!./ecology.md")}
+            source={require("json!./victory-scatter.json")}
+            scope={{
+              _,
+              React,
+              ReactDOM,
+              symbolData,
+              VictoryScatter: require("../src/components/victory-scatter")
+            }}
+            playgroundtheme="elegant" />
           <Style rules={theme}/>
         </div>
       </div>
@@ -25,7 +32,7 @@ class Docs extends React.Component {
 
 if (typeof document !== "undefined") {
   const content = document.getElementById("content");
-  ReactDOM.render(<Docs/>, content);  
+  ReactDOM.render(<Docs/>, content);
 }
 
 export default Docs;
