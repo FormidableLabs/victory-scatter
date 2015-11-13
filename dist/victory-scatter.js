@@ -118,7 +118,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    fill: "#756f6a",
 	    fontFamily: "Helvetica",
 	    fontSize: 10,
-	    textAnchor: "middle"
+	    textAnchor: "middle",
+	    padding: 5
 	  }
 	};
 	
@@ -154,6 +155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        x: this.getRange(props, "x"),
 	        y: this.getRange(props, "y")
 	      };
+	      this.data = this.getData(props);
 	      this.domain = {
 	        x: this.getDomain(props, "x"),
 	        y: this.getDomain(props, "y")
@@ -162,7 +164,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        x: this.getScale(props, "x"),
 	        y: this.getScale(props, "y")
 	      };
-	      this.data = this.getData(props);
 	    }
 	  }, {
 	    key: "getStyles",
@@ -211,10 +212,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function getDomain(props, axis) {
 	      if (props.domain) {
 	        return props.domain[axis] || props.domain;
-	      } else if (props.data) {
-	        return [_lodash2["default"].min(_lodash2["default"].pluck(props.data, axis)), _lodash2["default"].max(_lodash2["default"].pluck(props.data, axis))];
+	      } else {
+	        return [_lodash2["default"].min(_lodash2["default"].pluck(this.data, axis)), _lodash2["default"].max(_lodash2["default"].pluck(this.data, axis))];
 	      }
-	      return props.scale[axis] ? props.scale[axis].domain() : props.scale.domain();
 	    }
 	  }, {
 	    key: "getData",
@@ -240,7 +240,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      // if x is not given in props, create an array of values evenly
 	      // spaced across the x domain
-	      var domain = this.domain.x;
+	      var domainFromProps = props.domain && props.domain.x || props.domain;
+	      var domainFromScale = props.scale && props.scale.x ? props.scale.x.domain() : props.scale.domain();
+	      var domain = domainFromProps || domainFromScale;
+	
 	      var samples = _lodash2["default"].isArray(props.y) ? props.y.length : props.samples;
 	      var step = _lodash2["default"].max(domain) / samples;
 	      // return an array of x values spaced across the domain,
@@ -310,16 +313,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var component = this.props.labelComponent;
 	      var componentStyle = component && component.props.style || {};
 	      var style = _lodash2["default"].merge({}, this.getLabelStyle(data), componentStyle);
-	      var defaultDy = !component || !component.verticalAnchor ? style.padding : undefined;
 	      var children = component && component.props.children || data.label;
 	      var props = {
 	        key: "label-" + index,
 	        x: component && component.props.x || position.x,
-	        y: component && component.props.y || position.y,
-	        dy: component && component.props.dy || defaultDy * -1,
+	        y: component && component.props.y || position.y - style.padding,
+	        dy: component && component.props.dy,
 	        data: data, // Pass data for custom label component to access
 	        textAnchor: component && component.props.textAnchor || style.textAnchor,
-	        verticalAnchor: component && component.props.verticalAnchor,
+	        verticalAnchor: component && component.props.verticalAnchor || "end",
 	        style: style
 	      };
 	
@@ -416,7 +418,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	       * The animate prop specifies props for victory-animation to use. It this prop is
 	       * not given, the scatter plot will not tween between changing data / style props.
 	       * Large datasets might animate slowly due to the inherent limits of svg rendering.
-	       * @examples {delay: 5, velocity: 10, onEnd: () => alert("woo!")}
+	       * @examples {delay: 5, velocity: 0.02, onEnd: () => alert("woo!")}
 	       */
 	      animate: _react2["default"].PropTypes.object,
 	      /**
@@ -429,11 +431,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	       * of data points where each data point should be an object with x and y properties.
 	       * Other properties may be added to the data point object, such as fill, size, and symbol.
 	       * These properties will be interpreted and applied to the individual lines
-	       * @exampes [
-	       *   {x: 1, y: 125, fill: "red", symbol: "triangleUp", label: "foo"},
-	       *   {x: 10, y: 257, fill: "blue", symbol: "triangleDown", label: "bar"},
-	       *   {x: 100, y: 345, fill: "green", symbol: "diamond", label: "baz"},
-	       * ]
+	       * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
 	       */
 	      data: _react2["default"].PropTypes.arrayOf(_react2["default"].PropTypes.shape({
 	        x: _react2["default"].PropTypes.any,
@@ -445,7 +443,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	       * or as an object that specifies separate arrays for x and y.
 	       * If this prop is not provided, a domain will be calculated from data, or other
 	       * available information.
-	       * @exampes [-1, 1], {x: [0, 100], y: [0, 1]}
+	       * @examples [-1, 1], {x: [0, 100], y: [0, 1]}
 	       */
 	      domain: _react2["default"].PropTypes.oneOfType([_react2["default"].PropTypes.array, _react2["default"].PropTypes.shape({
 	        x: _react2["default"].PropTypes.array,
@@ -508,10 +506,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	       */
 	      standalone: _react2["default"].PropTypes.bool,
 	      /**
-	       * The style prop specifies styles for your chart. VictoryScatter relies on Radium,
-	       * so valid Radium style objects should work for this prop, however height, width, and margin
-	       * are used to calculate range, and need to be expressed as a number of pixels
-	       * @example {parent: {width: 300, margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
+	       * The style prop specifies styles for your scatter plot. VictoryScatter relies on Radium,
+	       * so valid Radium style objects should work for this prop. Height, width, and
+	       * padding should be specified via the height, width, and padding props, as they
+	       * are used to calculate the alignment of components within chart.
+	       * @examples {parent: {margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
 	       */
 	      style: _react2["default"].PropTypes.object,
 	      /**
@@ -525,7 +524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      /**
 	       * The x prop provides another way to supply data for scatter to plot. This prop can be given
 	       * as an array of values, and it will be plotted against whatever y prop is provided. If no
-	       * props are provided for y, the values in x will be plotted as the identity function (x) => x.
+	       * props are provided for y, the values in x will be plotted as the identity function.
 	       * @examples [1, 2, 3]
 	       */
 	      x: _react2["default"].PropTypes.array,
@@ -543,14 +542,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: "defaultProps",
 	    value: {
 	      height: 300,
-	      padding: 30,
+	      padding: 50,
 	      samples: 50,
 	      scale: _d32["default"].scale.linear(),
 	      showLabels: true,
 	      size: 3,
 	      standalone: true,
 	      symbol: "circle",
-	      width: 500,
+	      width: 450,
 	      y: function y(x) {
 	        return x;
 	      }

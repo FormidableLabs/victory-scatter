@@ -1,6 +1,6 @@
 {
   "name": "victory-scatter",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Scatter component for Victory",
   "main": "lib/index.js",
   "repository": {
