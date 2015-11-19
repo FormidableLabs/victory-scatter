@@ -349,7 +349,7 @@ export default class VictoryScatter extends React.Component {
     const style = _.merge({}, this.getLabelStyle(data), componentStyle);
     const children = component && component.props.children || data.label;
     const props = {
-      key: "label-" + index,
+      key: `label-${index}`,
       x: component && component.props.x || position.x,
       y: component && component.props.y || position.y - style.padding,
       dy: component && component.props.dy,
@@ -383,20 +383,21 @@ export default class VictoryScatter extends React.Component {
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, position.x, position.y, size);
     const styleData = _.omit(data, [
-        "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
-      ]);
+      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
+    ]);
     const scatterStyle = _.merge({}, this.style.data, styleData);
     const pathElement = (
       <path
         d={path}
         key={index}
         shapeRendering="optimizeSpeed"
-        style={scatterStyle}>
+        style={scatterStyle}
+      >
       </path>
     );
     if (data.label && this.props.showLabels) {
       return (
-        <g key={"data-label-" + index}>
+        <g key={`data-label-${index}`}>
           {pathElement}
           {this.getLabel(position, data, index)}
         </g>
@@ -426,7 +427,7 @@ export default class VictoryScatter extends React.Component {
 
       return (
         <VictoryAnimation {...this.props.animate} data={animateData}>
-          {props => <VictoryScatter {...this.props} {...props} animate={null}/>}
+          {(props) => <VictoryScatter {...this.props} {...props} animate={null}/>}
         </VictoryAnimation>
       );
     }
