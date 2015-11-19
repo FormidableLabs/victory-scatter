@@ -58,7 +58,7 @@ class App extends React.Component {
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     window.setInterval(() => {
       this.setState({
         data: getData()
@@ -75,14 +75,16 @@ class App extends React.Component {
           height={500}
           domain={[0, 600]}
           animate={{velocity: 0.03}}
-          data={this.state.data}/>
+          data={this.state.data}
+        />
 
         <VictoryScatter
           style={style}
           width={500}
           height={500}
           y={(x) => Math.sin(2 * Math.PI * x)}
-          sample={25}/>
+          sample={25}
+        />
 
         <VictoryScatter
           width={500}
@@ -90,7 +92,8 @@ class App extends React.Component {
           padding={50}
           labelComponent={<VictoryLabel style={{fill: "red"}}/>}
           style={symbolStyle}
-          data={symbolData}/>
+          data={symbolData}
+        />
 
         <VictoryScatter
           style={_.merge(
@@ -103,14 +106,16 @@ class App extends React.Component {
           bubbleProperty="z"
           maxBubbleSize={20}
           showLabels={false}
-          data={bubbleData}/>
+          data={bubbleData}
+        />
 
         <svg style={_.merge({width: 500, height: 300}, style.parent)}>
           <VictoryScatter
             width={500}
             height={300}
             style={style}
-            containerElement="g"/>
+            containerElement="g"
+          />
         </svg>
       </div>
     );

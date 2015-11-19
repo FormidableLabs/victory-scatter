@@ -1,10 +1,11 @@
-import React from "react";
+import React, { PropTypes } from "react";
 import Radium from "radium";
 import _ from "lodash";
 import d3 from "d3";
 import pathHelpers from "../path-helpers";
 import {VictoryAnimation} from "victory-animation";
 import {VictoryLabel} from "victory-label";
+import Util from "victory-util";
 
 
 const defaultStyles = {
@@ -34,12 +35,12 @@ export default class VictoryScatter extends React.Component {
      * Large datasets might animate slowly due to the inherent limits of svg rendering.
      * @examples {delay: 5, velocity: 0.02, onEnd: () => alert("woo!")}
      */
-    animate: React.PropTypes.object,
+    animate: PropTypes.object,
     /**
      * The bubbleProperty prop indicates which property of the data object should be used
      * to scale data points in a bubble chart
      */
-    bubbleProperty: React.PropTypes.string,
+    bubbleProperty: PropTypes.string,
     /**
      * The data prop specifies the data to be plotted. Data should be in the form of an array
      * of data points where each data point should be an object with x and y properties.
@@ -47,10 +48,10 @@ export default class VictoryScatter extends React.Component {
      * These properties will be interpreted and applied to the individual lines
      * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
      */
-    data: React.PropTypes.arrayOf(
-      React.PropTypes.shape({
-        x: React.PropTypes.any,
-        y: React.PropTypes.any
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        x: PropTypes.any,
+        y: PropTypes.any
       })
     ),
     /**
@@ -61,56 +62,56 @@ export default class VictoryScatter extends React.Component {
      * available information.
      * @examples [-1, 1], {x: [0, 100], y: [0, 1]}
      */
-    domain: React.PropTypes.oneOfType([
-      React.PropTypes.array,
-      React.PropTypes.shape({
-        x: React.PropTypes.array,
-        y: React.PropTypes.array
+    domain: PropTypes.oneOfType([
+      Util.PropTypes.minMaxArray,
+      PropTypes.shape({
+        x: Util.PropTypes.minMaxArray,
+        y: Util.PropTypes.minMaxArray
       })
     ]),
     /**
      * The height props specifies the height of the chart container element in pixels
      */
-    height: React.PropTypes.number,
+    height: Util.PropTypes.nonNegative,
     /**
      * The labelComponent prop takes in an entire, HTML-complete label component
      * which will be used to create labels for scatter to use
      */
-    labelComponent: React.PropTypes.element,
+    labelComponent: PropTypes.element,
     /**
      * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
      */
-    maxBubbleSize: React.PropTypes.number,
+    maxBubbleSize: Util.PropTypes.nonNegative,
     /**
      * The padding props specifies the amount of padding in number of pixels between
      * the edge of the chart and any rendered child components. This prop can be given
      * as a number or as an object with padding specified for top, bottom, left
      * and right.
      */
-    padding: React.PropTypes.oneOfType([
-      React.PropTypes.number,
-      React.PropTypes.shape({
-        top: React.PropTypes.number,
-        bottom: React.PropTypes.number,
-        left: React.PropTypes.number,
-        right: React.PropTypes.number
+    padding: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        top: PropTypes.number,
+        bottom: PropTypes.number,
+        left: PropTypes.number,
+        right: PropTypes.number
       })
     ]),
     /**
      * The samples prop specifies how many individual points to plot when plotting
      * y as a function of x. Samples is ignored if x props are provided instead.
      */
-    samples: React.PropTypes.number,
+    samples: Util.PropTypes.nonNegative,
     /**
      * The scale prop determines which scales your chart should use. This prop can be
      * given as a function, or as an object that specifies separate functions for x and y.
      * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
      */
-    scale: React.PropTypes.oneOfType([
-      React.PropTypes.func,
-      React.PropTypes.shape({
-        x: React.PropTypes.func,
-        y: React.PropTypes.func
+    scale: PropTypes.oneOfType([
+      Util.PropTypes.scale,
+      PropTypes.shape({
+        x: Util.PropTypes.scale,
+        y: Util.PropTypes.scale
       })
     ]),
     /**
@@ -119,17 +120,17 @@ export default class VictoryScatter extends React.Component {
      * If animations are running slowly, try setting this prop to false to cut down on
      * the number of svg nodes
      */
-    showLabels: React.PropTypes.bool,
+    showLabels: PropTypes.bool,
     /**
      * The size prop determines how to scale each data point
      */
-    size: React.PropTypes.number,
+    size: Util.PropTypes.nonNegative,
     /**
      * The standalone prop determines whether the component will render a standalone svg
      * or a <g> tag that will be included in an external svg. Set standalone to false to
      * compose VictoryScatter with other components within an enclosing <svg> tag.
      */
-    standalone: React.PropTypes.bool,
+    standalone: PropTypes.bool,
     /**
      * The style prop specifies styles for your scatter plot. VictoryScatter relies on Radium,
      * so valid Radium style objects should work for this prop. Height, width, and
@@ -137,24 +138,28 @@ export default class VictoryScatter extends React.Component {
      * are used to calculate the alignment of components within chart.
      * @examples {parent: {margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
      */
-    style: React.PropTypes.object,
+    style: PropTypes.shape({
+      parent: PropTypes.object,
+      data: PropTypes.object,
+      labels: PropTypes.object
+    }),
     /**
      * The symbol prop determines which symbol should be drawn to represent data points.
      */
-    symbol: React.PropTypes.oneOf([
+    symbol: PropTypes.oneOf([
       "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
     ]),
     /**
      * The width props specifies the width of the chart container element in pixels
      */
-    width: React.PropTypes.number,
+    width: Util.PropTypes.nonNegative,
     /**
      * The x prop provides another way to supply data for scatter to plot. This prop can be given
      * as an array of values, and it will be plotted against whatever y prop is provided. If no
      * props are provided for y, the values in x will be plotted as the identity function.
      * @examples [1, 2, 3]
      */
-    x: React.PropTypes.array,
+    x: Util.PropTypes.homogenousArray,
     /**
      * The y prop provides another way to supply data for scatter to plot. This prop can be given
      * as a function of x, or an array of values. If x props are given, they will be used
@@ -162,9 +167,9 @@ export default class VictoryScatter extends React.Component {
      * evenly spaced across the x domain will be calculated, and used for plotting data points.
      * @examples (x) => Math.sin(x), [1, 2, 3]
      */
-    y: React.PropTypes.oneOfType([
-      React.PropTypes.array,
-      React.PropTypes.func
+    y: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.func
     ])
   };
 
@@ -180,18 +185,6 @@ export default class VictoryScatter extends React.Component {
     width: 450,
     y: (x) => x
   };
-
-  componentWillMount() {
-    // If animating, the `VictoryScatter` instance wrapped in `VictoryAnimation`
-    // will compute these values.
-    if (!this.props.animate) {
-      this.getCalculatedValues(this.props);
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.getCalculatedValues(nextProps);
-  }
 
   getCalculatedValues(props) {
     this.style = this.getStyles(props);
@@ -343,13 +336,13 @@ export default class VictoryScatter extends React.Component {
     return _.merge({opacity, fill, padding}, this.style.labels);
   }
 
-  getLabel(position, data, index) {
+  renderLabel(position, data, index) {
     const component = this.props.labelComponent;
     const componentStyle = component && component.props.style || {};
     const style = _.merge({}, this.getLabelStyle(data), componentStyle);
     const children = component && component.props.children || data.label;
     const props = {
-      key: "label-" + index,
+      key: `label-${index}`,
       x: component && component.props.x || position.x,
       y: component && component.props.y || position.y - style.padding,
       dy: component && component.props.dy,
@@ -364,8 +357,7 @@ export default class VictoryScatter extends React.Component {
       React.createElement(VictoryLabel, props, children);
   }
 
-
-  getPathElement(data, index) {
+  renderPoint(data, index) {
     const pathFunctions = {
       circle: pathHelpers.circle,
       square: pathHelpers.square,
@@ -383,32 +375,32 @@ export default class VictoryScatter extends React.Component {
     const symbol = this.getSymbol(data);
     const path = pathFunctions[symbol].call(this, position.x, position.y, size);
     const styleData = _.omit(data, [
-        "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
-      ]);
+      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
+    ]);
     const scatterStyle = _.merge({}, this.style.data, styleData);
     const pathElement = (
       <path
         d={path}
         key={index}
         shapeRendering="optimizeSpeed"
-        style={scatterStyle}>
+        style={scatterStyle}
+      >
       </path>
     );
     if (data.label && this.props.showLabels) {
       return (
-        <g key={"data-label-" + index}>
+        <g key={`data-label-${index}`}>
           {pathElement}
-          {this.getLabel(position, data, index)}
+          {this.renderLabel(position, data, index)}
         </g>
       );
     }
     return pathElement;
   }
 
-  plotDataPoints() {
-    const data = this.data;
-    return _.map(data, (dataPoint, index) => {
-      return this.getPathElement(dataPoint, index);
+  renderData() {
+    return _.map(this.data, (dataPoint, index) => {
+      return this.renderPoint(dataPoint, index);
     });
   }
 
@@ -420,18 +412,21 @@ export default class VictoryScatter extends React.Component {
       // Do less work by having `VictoryAnimation` tween only values that
       // make sense to tween. In the future, allow customization of animated
       // prop whitelist/blacklist?
-      const animateData = _.omit(this.props, [
-        "animate", "scale", "showLabels", "standalone"
+      const animateData = _.pick(this.props, [
+        "data", "domain", "height", "maxBubbleSize", "padding", "samples", "size",
+        "style", "width", "x", "y"
       ]);
 
       return (
         <VictoryAnimation {...this.props.animate} data={animateData}>
-          {props => <VictoryScatter {...this.props} {...props} animate={null}/>}
+          {(props) => <VictoryScatter {...this.props} {...props} animate={null}/>}
         </VictoryAnimation>
       );
+    } else {
+      this.getCalculatedValues(this.props);
     }
     const style = this.style.parent;
-    const group = <g style={style}>{this.plotDataPoints()}</g>;
+    const group = <g style={style}>{this.renderData()}</g>;
     return this.props.standalone ? <svg style={style}>{group}</svg> : group;
   }
 }
