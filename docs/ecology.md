@@ -1,7 +1,7 @@
-Victory Scatter
+VictoryScatter
 =============
 
-VictoryScatter creates a scatter of points from data. VictoryScatter is a composable component, so it does not include an axis.  Check out [VictoryChart](https://github.com/formidablelabs/victory-chart) for easy to use scatter plots and more.
+VictoryScatter creates a scatter of points from data. VictoryScatter is a composable component, so it does not include an axis. Check out [VictoryChart](https://github.com/formidablelabs/victory-chart) for easy to use scatter plots and more.
 
 ## Features
 
@@ -35,7 +35,7 @@ VictoryScatter can also plot functions:
  />
 ```
 
-### Flexible and configurable 
+### Flexible and configurable
 
 The sensible defaults VictoryScatter provides makes it easy to get started, but everything can be overridden, and configured to suit your needs:
 
@@ -54,8 +54,13 @@ Style data for the entire chart with props:
     symbol="star"
     style={{
       data: {
-        fill: "gold", stroke: "orange", 
-        strokeWidth: 3
+        fill: "gold",
+        stroke: "orange",
+        strokeWidth: 3,
+        ":hover": {
+          fill: "orange",
+          stroke: "gold",
+        }
       }
     }}
  />
@@ -67,30 +72,30 @@ Or style data points individually:
 <VictoryScatter
     data={[
       {
-        x: 1, y: 3, fill: "red", 
+        x: 1, y: 3, fill: "red",
         symbol: "plus", size: 6
       },
       {
-        x: 2, y: 5, fill: "magenta", 
+        x: 2, y: 5, fill: "magenta",
         size: 9, opacity: 0.4
       },      
       {
-        x: 3, y: 4, fill: "orange", 
+        x: 3, y: 4, fill: "orange",
         size: 5, label: "LABEL"
       },
       {
-        x: 4, y: 2, fill: "brown", 
+        x: 4, y: 2, fill: "brown",
         symbol: "square", size: 6
       },
       {
-        x: 5, y: 5, fill: "black", 
+        x: 5, y: 5, fill: "black",
         symbol: "triangleUp", size: 5
       }
     ]}
  />
 ```
 
-The following symbols are already supported. More robust symbol support coming soon. 
+The following symbols are already supported. More robust symbol support coming soon.
 
 ```playground
 <VictoryScatter
@@ -117,7 +122,7 @@ class App extends React.Component {
 
   getData() {
     const colors =[
-      "violet", "tomato", "cornflowerblue", 
+      "violet", "tomato", "cornflowerblue",
       "turquoise",  "greenyellow", "orange"
     ];
     const symbols = [
@@ -152,7 +157,7 @@ class App extends React.Component {
         animate={{velocity: 0.02}}
         data={this.state.data}
       />
-        
+
     );
   }
 }
