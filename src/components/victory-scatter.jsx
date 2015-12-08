@@ -2,9 +2,9 @@ import React, { PropTypes } from "react";
 import Radium from "radium";
 import _ from "lodash";
 import d3 from "d3";
-import pathHelpers from "../path-helpers";
 import {VictoryAnimation} from "victory-animation";
 import {VictoryLabel} from "victory-label";
+import Point from "./point";
 import Util from "victory-util";
 
 
@@ -326,76 +326,34 @@ export default class VictoryScatter extends React.Component {
     return _.max([radius, 1]);
   }
 
-  getLabelStyle(data) {
-    const size = this.getSize(data);
-    // match labels styles to data style by default (fill, opacity, others?)
-    const opacity = data.opacity || this.style.data.opacity;
-    // match label color to data color if it is not given.
-    const fill = data.fill || this.style.data.fill;
-    const padding = this.style.labels.padding || size * 0.25;
-    return _.merge({opacity, fill, padding}, this.style.labels);
-  }
-
-  renderLabel(position, data, index) {
-    const component = this.props.labelComponent;
-    const componentStyle = component && component.props.style || {};
-    const style = _.merge({}, this.getLabelStyle(data), componentStyle);
-    const children = component && component.props.children || data.label;
-    const props = {
-      key: `label-${index}`,
-      x: component && component.props.x || position.x,
-      y: component && component.props.y || position.y - style.padding,
-      dy: component && component.props.dy,
-      data, // Pass data for custom label component to access
-      textAnchor: component && component.props.textAnchor || style.textAnchor,
-      verticalAnchor: component && component.props.verticalAnchor || "end",
-      style
-    };
-
-    return component ?
-      React.cloneElement(component, props, children) :
-      React.createElement(VictoryLabel, props, children);
-  }
+  
 
   renderPoint(data, index) {
-    const pathFunctions = {
-      circle: pathHelpers.circle,
-      square: pathHelpers.square,
-      diamond: pathHelpers.diamond,
-      triangleDown: pathHelpers.triangleDown,
-      triangleUp: pathHelpers.triangleUp,
-      plus: pathHelpers.plus,
-      star: pathHelpers.star
-    };
     const position = {
       x: this.scale.x.call(this, data.x),
       y: this.scale.y.call(this, data.y)
     };
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
-    const path = pathFunctions[symbol].call(this, position.x, position.y, size);
+
     const styleData = _.omit(data, [
       "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
     ]);
     const scatterStyle = _.merge({}, this.style.data, styleData);
-    const pathElement = (
-      <path
-        d={path}
+    const pointElement = (
+      <Point
         key={index}
-        shapeRendering="optimizeSpeed"
         style={scatterStyle}
+        x={position.x}
+        y={position.y}
+        data={data}
+        size={this.getSize(data)}
+        symbol={this.getSymbol(data)}
       >
-      </path>
+    </Point>
     );
-    if (data.label && this.props.showLabels) {
-      return (
-        <g key={`data-label-${index}`}>
-          {pathElement}
-          {this.renderLabel(position, data, index)}
-        </g>
-      );
-    }
-    return pathElement;
+
+    return pointElement;
   }
 
   renderData() {
