@@ -3,7 +3,8 @@ import _ from "lodash";
 import Radium, { Style } from "radium";
 import React from "react";
 import ReactDOM from "react-dom";
-import symbolData from "./symbol-data"
+import symbolData from "./symbol-data";
+import * as docgen from "react-docgen";
 
 import { VictoryTheme } from "formidable-landers";
 
@@ -14,7 +15,7 @@ class Docs extends React.Component {
       <div>
         <Ecology
           overview={require("!!raw!./ecology.md")}
-          source={require("json!./victory-scatter.json")}
+          source={docgen.parse(require("!!raw!../src/components/victory-scatter"))}
           scope={{
             _,
             React,
