@@ -14,7 +14,7 @@ class Docs extends React.Component {
       <div>
         <Ecology
           overview={require("!!raw!./ecology.md")}
-          source={require("json!./victory-scatter.json")}
+          source={require("!!docgen!../src/components/victory-scatter")[0]}
           scope={{
             _,
             React,
