@@ -1,7 +1,8 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
-import d3 from "d3";
 import pathHelpers from "../path-helpers";
+import {VictoryLabel} from "victory-label";
+
 
 
 
@@ -12,16 +13,38 @@ export default class Point extends React.Component {
       x: React.PropTypes.any,
       y: React.PropTypes.any
     }),
-    x: React.PropTypes.number,
-    y: React.PropTypes.number,
+    labelComponent: React.PropTypes.element,
     symbol: React.PropTypes.string,
     size: React.PropTypes.number,
-    showLabels:
+    showLabels: React.PropTypes.bool,
     style: PropTypes.shape({
       data: React.PropTypes.object,
       labels: React.PropTypes.object
-    })
+    }),
+    x: React.PropTypes.number,
+    y: React.PropTypes.number
   };
+
+  static defaultProps = {
+    showLabels: true,
+  }
+
+  getCalculatedValues(props) {
+    this.style = this.getStyle(props);
+  }
+
+  getStyle(props) {
+    // TODO: functional styles
+    const stylesFromData = _.omit(props.data, [
+      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
+    ]);
+    const dataStyle = _.merge({}, props.style.data, stylesFromData);
+    // match certain label styles to data if styles are not given
+    const matchedStyle = _.pick(dataStyle, ["opacity", "fill"]);
+    const padding = props.style.labels.padding || props.size * 0.25;
+    const labelStyle = _.merge({padding}, matchedStyle, props.style.labels);
+    return {data: dataStyle, labels: labelStyle};
+  }
 
   getPath(props) {
     const pathFunctions = {
@@ -36,47 +59,29 @@ export default class Point extends React.Component {
     return pathFunctions[props.symbol].call(this, props.x, props.y, props.size);
   }
 
-  if (data.label && this.props.showLabels) {
-    return (
-      <g key={`data-label-${index}`}>
-        {pointElement}
-        {this.renderLabel(position, data, index)}
-      </g>
-    );
-  }
-
-  getDataStyle(props) {
-    // TODO functional styles
-    return props.style.data;
-  }
-
   renderPoint(props) {
     return (
       <path
-        style={this.getStyle(props)}
+        style={this.style.data}
         d={this.getPath(props)}
         shapeRendering="optimizeSpeed"
       />
     );
   }
 
-  getLabelStyle(props) {
-    // match labels styles to data style by default (fill, opacity, others?)
-    const dataStyle = _.pick(props.style.data, ["opacity", "fill"])
-    const padding = this.style.labels.padding || this.props.size * 0.25;
-    return _.merge({padding}, dataStyle, this.style.labels);
-  }
-
   renderLabel(props) {
+    if (props.showLabels === false || !props.data.label) {
+      return undefined;
+    }
     const component = props.labelComponent;
     const componentStyle = component && component.props.style || {};
-    const style = _.merge({}, this.getLabelStyle(props), componentStyle);
+    const style = _.merge({}, this.style.labels, componentStyle);
     const children = component && component.props.children || props.data.label;
     const labelProps = {
       x: component && component.props.x || props.x,
       y: component && component.props.y || props.y - style.padding,
       dy: component && component.props.dy,
-      data, // Pass data for custom label component to access
+      data: props.data,
       textAnchor: component && component.props.textAnchor || style.textAnchor,
       verticalAnchor: component && component.props.verticalAnchor || "end",
       style
@@ -88,6 +93,12 @@ export default class Point extends React.Component {
   }
 
   render() {
-
+    this.getCalculatedValues(this.props);
+    return (
+      <g>
+        {this.renderPoint(this.props)}
+        {this.renderLabel(this.props)}
+      </g>
+    );
   }
 }

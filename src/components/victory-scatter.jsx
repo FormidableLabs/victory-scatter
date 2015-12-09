@@ -1,9 +1,8 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import _ from "lodash";
-import d3 from "d3";
+import d3Scale from "d3-scale";
 import {VictoryAnimation} from "victory-animation";
-import {VictoryLabel} from "victory-label";
 import Point from "./point";
 import Util from "victory-util";
 
@@ -105,7 +104,7 @@ export default class VictoryScatter extends React.Component {
     /**
      * The scale prop determines which scales your chart should use. This prop can be
      * given as a function, or as an object that specifies separate functions for x and y.
-     * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
+     * @exampes d3Scale.time(), {x: d3Scale.linear(), y:tick d3Scale.log()}
      */
     scale: PropTypes.oneOfType([
       Util.PropTypes.scale,
@@ -326,7 +325,7 @@ export default class VictoryScatter extends React.Component {
     return _.max([radius, 1]);
   }
 
-  
+
 
   renderPoint(data, index) {
     const position = {
@@ -335,15 +334,12 @@ export default class VictoryScatter extends React.Component {
     };
     const size = this.getSize(data);
     const symbol = this.getSymbol(data);
-
-    const styleData = _.omit(data, [
-      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
-    ]);
-    const scatterStyle = _.merge({}, this.style.data, styleData);
     const pointElement = (
       <Point
         key={index}
-        style={scatterStyle}
+        labelComponent={this.props.labelComponent}
+        showLabels={this.props.showLabels}
+        style={this.style}
         x={position.x}
         y={position.y}
         data={data}
