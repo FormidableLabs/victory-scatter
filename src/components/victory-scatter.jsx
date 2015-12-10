@@ -67,6 +67,10 @@ export default class VictoryScatter extends React.Component {
         y: Util.PropTypes.domain
       })
     ]),
+    events: PropTypes.shape({
+      data: PropTypes.object,
+      labels: PropTypes.object
+    }),
     /**
      * The height props specifies the height of the chart container element in pixels
      */
@@ -122,7 +126,10 @@ export default class VictoryScatter extends React.Component {
     /**
      * The size prop determines how to scale each data point
      */
-    size: Util.PropTypes.nonNegative,
+    size: PropTypes.oneOfType([
+      Util.PropTypes.nonNegative,
+      PropTypes.func
+    ]),
     /**
      * The standalone prop determines whether the component will render a standalone svg
      * or a <g> tag that will be included in an external svg. Set standalone to false to
@@ -144,8 +151,11 @@ export default class VictoryScatter extends React.Component {
     /**
      * The symbol prop determines which symbol should be drawn to represent data points.
      */
-    symbol: PropTypes.oneOf([
-      "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+    symbol: PropTypes.oneOfType([
+      PropTypes.oneOf([
+        "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+      ]),
+      PropTypes.func
     ]),
     /**
      * The width props specifies the width of the chart container element in pixels
@@ -305,7 +315,9 @@ export default class VictoryScatter extends React.Component {
   getSize(data) {
     const z = this.props.bubbleProperty;
     if (data.size) {
-      return _.max([data.size, 1]);
+      return _.isFunction(data.size) ? data.size : _.max([data.size, 1]);
+    } else if (_.isFunction(this.props.size)) {
+      return this.props.size;
     } else if (z && data[z]) {
       return this.getBubbleSize(data, z);
     } else {
@@ -337,6 +349,7 @@ export default class VictoryScatter extends React.Component {
       <Point
         key={`point-${index}`}
         animate={this.props.animate}
+        events={this.props.events}
         labelComponent={this.props.labelComponent}
         showLabels={this.props.showLabels}
         style={this.style}

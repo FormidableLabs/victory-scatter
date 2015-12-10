@@ -34,6 +34,16 @@ const style = {
   }
 };
 
+const functionalStyle = {
+  parent: {
+    border: "1px solid #ccc",
+    margin: 20
+  },
+  data: {
+    fill: (data) => data.y > 0 ? "red" : "blue"
+  }
+};
+
 const symbolStyle = {
   parent: {
     border: "1px solid #ccc",
@@ -79,9 +89,17 @@ class App extends React.Component {
         />
 
         <VictoryScatter
-          style={style}
+          style={_.merge(
+            {},
+            style,
+            {data: {fill: (data) => data.y > 0 ? "red" : "blue"}}
+          )}
+          events={{
+            data: {onClick: () => alert("woo")}
+          }}
           width={500}
           height={500}
+          symbol={(data) => data.y > 0 ? "triangleUp" : "triangleDown"}
           y={(x) => Math.sin(2 * Math.PI * x)}
           sample={25}
         />

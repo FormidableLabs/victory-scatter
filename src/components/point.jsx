@@ -11,9 +11,21 @@ export default class Point extends React.Component {
       x: React.PropTypes.any,
       y: React.PropTypes.any
     }),
+    events: PropTypes.shape({
+      data: PropTypes.object,
+      labels: PropTypes.object
+    }),
     labelComponent: React.PropTypes.element,
-    symbol: React.PropTypes.string,
-    size: React.PropTypes.number,
+    symbol: PropTypes.oneOfType([
+      PropTypes.oneOf([
+        "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+      ]),
+      PropTypes.func
+    ]),
+    size: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.func
+    ]),
     showLabels: React.PropTypes.bool,
     style: PropTypes.shape({
       data: React.PropTypes.object,
@@ -25,6 +37,7 @@ export default class Point extends React.Component {
 
   static defaultProps = {
     showLabels: true,
+    events: {}
   }
 
   getCalculatedValues(props) {
@@ -32,16 +45,25 @@ export default class Point extends React.Component {
   }
 
   getStyle(props) {
-    // TODO: functional styles
     const stylesFromData = _.omit(props.data, [
       "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
     ]);
-    const dataStyle = _.merge({}, props.style.data, stylesFromData);
+    const dataStyle = this.evaluateStyle(_.merge({}, props.style.data, stylesFromData));
     // match certain label styles to data if styles are not given
     const matchedStyle = _.pick(dataStyle, ["opacity", "fill"]);
     const padding = props.style.labels.padding || props.size * 0.25;
-    const labelStyle = _.merge({padding}, matchedStyle, props.style.labels);
+    const labelStyle = this.evaluateStyle(_.merge({padding}, matchedStyle, props.style.labels));
     return {data: dataStyle, labels: labelStyle};
+  }
+
+  evaluateStyle(style) {
+    return _.transform(style, (result, value, key) => {
+      result[key] = this.evaluateProp(value);
+    });
+  }
+
+  evaluateProp(prop) {
+    return _.isFunction(prop) ? prop.call(this, this.props.data) : prop
   }
 
   getPath(props) {
@@ -54,12 +76,15 @@ export default class Point extends React.Component {
       plus: pathHelpers.plus,
       star: pathHelpers.star
     };
-    return pathFunctions[props.symbol].call(this, props.x, props.y, props.size);
+    const size = this.evaluateProp(props.size);
+    const symbol = this.evaluateProp(props.symbol);
+    return pathFunctions[symbol].call(this, props.x, props.y, size);
   }
 
   renderPoint(props) {
     return (
       <path
+        {...props.events.data}
         style={this.style.data}
         d={this.getPath(props)}
         shapeRendering="optimizeSpeed"
@@ -75,7 +100,7 @@ export default class Point extends React.Component {
     const componentStyle = component && component.props.style || {};
     const style = _.merge({}, this.style.labels, componentStyle);
     const children = component && component.props.children || props.data.label;
-    const labelProps = {
+    const labelProps = _.merge({
       x: component && component.props.x || props.x,
       y: component && component.props.y || props.y - style.padding,
       dy: component && component.props.dy,
@@ -83,7 +108,7 @@ export default class Point extends React.Component {
       textAnchor: component && component.props.textAnchor || style.textAnchor,
       verticalAnchor: component && component.props.verticalAnchor || "end",
       style
-    };
+    }, props.events);
 
     return component ?
       React.cloneElement(component, labelProps, children) :
