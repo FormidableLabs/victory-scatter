@@ -185,7 +185,7 @@ export default class VictoryScatter extends React.Component {
     height: 300,
     padding: 50,
     samples: 50,
-    scale: d3.scale.linear(),
+    scale: d3Scale.linear(),
     showLabels: true,
     size: 3,
     standalone: true,
@@ -336,15 +336,11 @@ export default class VictoryScatter extends React.Component {
     return _.max([radius, 1]);
   }
 
-
-
   renderPoint(data, index) {
     const position = {
       x: this.scale.x.call(this, data.x),
       y: this.scale.y.call(this, data.y)
     };
-    const size = this.getSize(data);
-    const symbol = this.getSymbol(data);
     const pointElement = (
       <Point
         key={`point-${index}`}
@@ -358,8 +354,7 @@ export default class VictoryScatter extends React.Component {
         data={data}
         size={this.getSize(data)}
         symbol={this.getSymbol(data)}
-      >
-    </Point>
+      />
     );
 
     return pointElement;

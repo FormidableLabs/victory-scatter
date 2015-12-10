@@ -34,16 +34,6 @@ const style = {
   }
 };
 
-const functionalStyle = {
-  parent: {
-    border: "1px solid #ccc",
-    margin: 20
-  },
-  data: {
-    fill: (data) => data.y > 0 ? "red" : "blue"
-  }
-};
-
 const symbolStyle = {
   parent: {
     border: "1px solid #ccc",
@@ -77,6 +67,9 @@ class App extends React.Component {
   }
 
   render() {
+    /* eslint-disable no-alert */
+    const handleClick = () => window.alert("WOO!");
+    /* eslint-enable no-alert */
     return (
       <div>
         <VictoryScatter
@@ -95,7 +88,7 @@ class App extends React.Component {
             {data: {fill: (data) => data.y > 0 ? "red" : "blue"}}
           )}
           events={{
-            data: {onClick: () => alert("woo")}
+            data: {onClick: () => handleClick()}
           }}
           width={500}
           height={500}

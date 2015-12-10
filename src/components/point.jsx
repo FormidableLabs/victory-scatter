@@ -1,3 +1,4 @@
+import _ from "lodash";
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import pathHelpers from "../path-helpers";
@@ -7,6 +8,7 @@ import {VictoryAnimation} from "victory-animation";
 @Radium
 export default class Point extends React.Component {
   static propTypes = {
+    animate: PropTypes.object,
     data: PropTypes.shape({
       x: React.PropTypes.any,
       y: React.PropTypes.any
@@ -46,7 +48,7 @@ export default class Point extends React.Component {
 
   getStyle(props) {
     const stylesFromData = _.omit(props.data, [
-      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
+      "x", "y", "z", "size", "symbol", "name", "label"
     ]);
     const dataStyle = this.evaluateStyle(_.merge({}, props.style.data, stylesFromData));
     // match certain label styles to data if styles are not given
@@ -63,7 +65,7 @@ export default class Point extends React.Component {
   }
 
   evaluateProp(prop) {
-    return _.isFunction(prop) ? prop.call(this, this.props.data) : prop
+    return _.isFunction(prop) ? prop.call(this, this.props.data) : prop;
   }
 
   getPath(props) {
