@@ -2,7 +2,6 @@ import React, { PropTypes } from "react";
 import Radium from "radium";
 import _ from "lodash";
 import d3Scale from "d3-scale";
-import {VictoryAnimation} from "victory-animation";
 import Point from "./point";
 import Util from "victory-util";
 
@@ -336,7 +335,8 @@ export default class VictoryScatter extends React.Component {
     const symbol = this.getSymbol(data);
     const pointElement = (
       <Point
-        key={index}
+        key={`point-${index}`}
+        animate={this.props.animate}
         labelComponent={this.props.labelComponent}
         showLabels={this.props.showLabels}
         style={this.style}
@@ -359,26 +359,7 @@ export default class VictoryScatter extends React.Component {
   }
 
   render() {
-    // If animating, return a `VictoryAnimation` element that will create
-    // a new `VictoryScatter` with nearly identical props, except (1) tweened
-    // and (2) `animate` set to null so we don't recurse forever.
-    if (this.props.animate) {
-      // Do less work by having `VictoryAnimation` tween only values that
-      // make sense to tween. In the future, allow customization of animated
-      // prop whitelist/blacklist?
-      const animateData = _.pick(this.props, [
-        "data", "domain", "height", "maxBubbleSize", "padding", "samples", "size",
-        "style", "width", "x", "y"
-      ]);
-
-      return (
-        <VictoryAnimation {...this.props.animate} data={animateData}>
-          {(props) => <VictoryScatter {...this.props} {...props} animate={null}/>}
-        </VictoryAnimation>
-      );
-    } else {
-      this.getCalculatedValues(this.props);
-    }
+    this.getCalculatedValues(this.props);
     const style = this.style.parent;
     const group = <g style={style}>{this.renderData()}</g>;
     return this.props.standalone ? <svg style={style}>{group}</svg> : group;
