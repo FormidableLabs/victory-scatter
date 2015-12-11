@@ -1,10 +1,8 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import _ from "lodash";
-import d3 from "d3";
-import pathHelpers from "../path-helpers";
-import {VictoryAnimation} from "victory-animation";
-import {VictoryLabel} from "victory-label";
+import d3Scale from "d3-scale";
+import Point from "./point";
 import Util from "victory-util";
 
 
@@ -105,7 +103,7 @@ export default class VictoryScatter extends React.Component {
     /**
      * The scale prop determines which scales your chart should use. This prop can be
      * given as a function, or as an object that specifies separate functions for x and y.
-     * @exampes d3.time.scale(), {x: d3.scale.linear(), y:tickd3.scale.log()}
+     * @exampes d3Scale.time(), {x: d3Scale.linear(), y:tick d3Scale.log()}
      */
     scale: PropTypes.oneOfType([
       Util.PropTypes.scale,
@@ -124,7 +122,10 @@ export default class VictoryScatter extends React.Component {
     /**
      * The size prop determines how to scale each data point
      */
-    size: Util.PropTypes.nonNegative,
+    size: PropTypes.oneOfType([
+      Util.PropTypes.nonNegative,
+      PropTypes.func
+    ]),
     /**
      * The standalone prop determines whether the component will render a standalone svg
      * or a <g> tag that will be included in an external svg. Set standalone to false to
@@ -146,8 +147,11 @@ export default class VictoryScatter extends React.Component {
     /**
      * The symbol prop determines which symbol should be drawn to represent data points.
      */
-    symbol: PropTypes.oneOf([
-      "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+    symbol: PropTypes.oneOfType([
+      PropTypes.oneOf([
+        "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
+      ]),
+      PropTypes.func
     ]),
     /**
      * The width props specifies the width of the chart container element in pixels
@@ -177,7 +181,7 @@ export default class VictoryScatter extends React.Component {
     height: 300,
     padding: 50,
     samples: 50,
-    scale: d3.scale.linear(),
+    scale: d3Scale.linear(),
     showLabels: true,
     size: 3,
     standalone: true,
@@ -307,7 +311,9 @@ export default class VictoryScatter extends React.Component {
   getSize(data) {
     const z = this.props.bubbleProperty;
     if (data.size) {
-      return _.max([data.size, 1]);
+      return _.isFunction(data.size) ? data.size : _.max([data.size, 1]);
+    } else if (_.isFunction(this.props.size)) {
+      return this.props.size;
     } else if (z && data[z]) {
       return this.getBubbleSize(data, z);
     } else {
@@ -326,76 +332,27 @@ export default class VictoryScatter extends React.Component {
     return _.max([radius, 1]);
   }
 
-  getLabelStyle(data) {
-    const size = this.getSize(data);
-    // match labels styles to data style by default (fill, opacity, others?)
-    const opacity = data.opacity || this.style.data.opacity;
-    // match label color to data color if it is not given.
-    const fill = data.fill || this.style.data.fill;
-    const padding = this.style.labels.padding || size * 0.25;
-    return _.merge({opacity, fill, padding}, this.style.labels);
-  }
-
-  renderLabel(position, data, index) {
-    const component = this.props.labelComponent;
-    const componentStyle = component && component.props.style || {};
-    const style = _.merge({}, this.getLabelStyle(data), componentStyle);
-    const children = component && component.props.children || data.label;
-    const props = {
-      key: `label-${index}`,
-      x: component && component.props.x || position.x,
-      y: component && component.props.y || position.y - style.padding,
-      dy: component && component.props.dy,
-      data, // Pass data for custom label component to access
-      textAnchor: component && component.props.textAnchor || style.textAnchor,
-      verticalAnchor: component && component.props.verticalAnchor || "end",
-      style
-    };
-
-    return component ?
-      React.cloneElement(component, props, children) :
-      React.createElement(VictoryLabel, props, children);
-  }
-
   renderPoint(data, index) {
-    const pathFunctions = {
-      circle: pathHelpers.circle,
-      square: pathHelpers.square,
-      diamond: pathHelpers.diamond,
-      triangleDown: pathHelpers.triangleDown,
-      triangleUp: pathHelpers.triangleUp,
-      plus: pathHelpers.plus,
-      star: pathHelpers.star
-    };
     const position = {
       x: this.scale.x.call(this, data.x),
       y: this.scale.y.call(this, data.y)
     };
-    const size = this.getSize(data);
-    const symbol = this.getSymbol(data);
-    const path = pathFunctions[symbol].call(this, position.x, position.y, size);
-    const styleData = _.omit(data, [
-      "x", "y", "z", this.props.bubbleProperty, "size", "symbol", "name", "label"
-    ]);
-    const scatterStyle = _.merge({}, this.style.data, styleData);
-    const pathElement = (
-      <path
-        d={path}
-        key={index}
-        shapeRendering="optimizeSpeed"
-        style={scatterStyle}
-      >
-      </path>
+    const pointElement = (
+      <Point
+        key={`point-${index}`}
+        animate={this.props.animate}
+        labelComponent={this.props.labelComponent}
+        showLabels={this.props.showLabels}
+        style={this.style}
+        x={position.x}
+        y={position.y}
+        data={data}
+        size={this.getSize(data)}
+        symbol={this.getSymbol(data)}
+      />
     );
-    if (data.label && this.props.showLabels) {
-      return (
-        <g key={`data-label-${index}`}>
-          {pathElement}
-          {this.renderLabel(position, data, index)}
-        </g>
-      );
-    }
-    return pathElement;
+
+    return pointElement;
   }
 
   renderData() {
@@ -405,26 +362,7 @@ export default class VictoryScatter extends React.Component {
   }
 
   render() {
-    // If animating, return a `VictoryAnimation` element that will create
-    // a new `VictoryScatter` with nearly identical props, except (1) tweened
-    // and (2) `animate` set to null so we don't recurse forever.
-    if (this.props.animate) {
-      // Do less work by having `VictoryAnimation` tween only values that
-      // make sense to tween. In the future, allow customization of animated
-      // prop whitelist/blacklist?
-      const animateData = _.pick(this.props, [
-        "data", "domain", "height", "maxBubbleSize", "padding", "samples", "size",
-        "style", "width", "x", "y"
-      ]);
-
-      return (
-        <VictoryAnimation {...this.props.animate} data={animateData}>
-          {(props) => <VictoryScatter {...this.props} {...props} animate={null}/>}
-        </VictoryAnimation>
-      );
-    } else {
-      this.getCalculatedValues(this.props);
-    }
+    this.getCalculatedValues(this.props);
     const style = this.style.parent;
     const group = <g style={style}>{this.renderData()}</g>;
     return this.props.standalone ? <svg style={style}>{group}</svg> : group;

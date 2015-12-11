@@ -79,9 +79,14 @@ class App extends React.Component {
         />
 
         <VictoryScatter
-          style={style}
+          style={_.merge(
+            {},
+            style,
+            {data: {fill: (data) => data.y > 0 ? "red" : "blue"}}
+          )}
           width={500}
           height={500}
+          symbol={(data) => data.y > 0 ? "triangleUp" : "triangleDown"}
           y={(x) => Math.sin(2 * Math.PI * x)}
           sample={25}
         />
