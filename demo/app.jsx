@@ -67,9 +67,6 @@ class App extends React.Component {
   }
 
   render() {
-    /* eslint-disable no-alert */
-    const handleClick = () => window.alert("WOO!");
-    /* eslint-enable no-alert */
     return (
       <div>
         <VictoryScatter
@@ -87,9 +84,6 @@ class App extends React.Component {
             style,
             {data: {fill: (data) => data.y > 0 ? "red" : "blue"}}
           )}
-          events={{
-            data: {onClick: () => handleClick()}
-          }}
           width={500}
           height={500}
           symbol={(data) => data.y > 0 ? "triangleUp" : "triangleDown"}

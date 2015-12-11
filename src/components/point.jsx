@@ -13,10 +13,6 @@ export default class Point extends React.Component {
       x: React.PropTypes.any,
       y: React.PropTypes.any
     }),
-    events: PropTypes.shape({
-      data: PropTypes.object,
-      labels: PropTypes.object
-    }),
     labelComponent: React.PropTypes.element,
     symbol: PropTypes.oneOfType([
       PropTypes.oneOf([
@@ -38,8 +34,7 @@ export default class Point extends React.Component {
   };
 
   static defaultProps = {
-    showLabels: true,
-    events: {}
+    showLabels: true
   }
 
   getCalculatedValues(props) {
@@ -86,7 +81,6 @@ export default class Point extends React.Component {
   renderPoint(props) {
     return (
       <path
-        {...props.events.data}
         style={this.style.data}
         d={this.getPath(props)}
         shapeRendering="optimizeSpeed"
@@ -102,7 +96,7 @@ export default class Point extends React.Component {
     const componentStyle = component && component.props.style || {};
     const style = _.merge({}, this.style.labels, componentStyle);
     const children = component && component.props.children || props.data.label;
-    const labelProps = _.merge({
+    const labelProps = {
       x: component && component.props.x || props.x,
       y: component && component.props.y || props.y - style.padding,
       dy: component && component.props.dy,
@@ -110,7 +104,7 @@ export default class Point extends React.Component {
       textAnchor: component && component.props.textAnchor || style.textAnchor,
       verticalAnchor: component && component.props.verticalAnchor || "end",
       style
-    }, props.events);
+    };
 
     return component ?
       React.cloneElement(component, labelProps, children) :

@@ -67,10 +67,6 @@ export default class VictoryScatter extends React.Component {
         y: Util.PropTypes.domain
       })
     ]),
-    events: PropTypes.shape({
-      data: PropTypes.object,
-      labels: PropTypes.object
-    }),
     /**
      * The height props specifies the height of the chart container element in pixels
      */
@@ -345,7 +341,6 @@ export default class VictoryScatter extends React.Component {
       <Point
         key={`point-${index}`}
         animate={this.props.animate}
-        events={this.props.events}
         labelComponent={this.props.labelComponent}
         showLabels={this.props.showLabels}
         style={this.style}
