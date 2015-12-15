@@ -1,24 +1,33 @@
 /**
  * Client tests
  */
-import React from "react/addons";
-import Component from "src/components/victory-scatter";
-
+import React from "react";
+import ReactDOM from "react-dom";
+import VictoryScatter from "src/components/victory-scatter";
 // Use `TestUtils` to inject into DOM, simulate events, etc.
 // See: https://facebook.github.io/react/docs/test-utils.html
-const TestUtils = React.addons.TestUtils;
+import TestUtils from "react-addons-test-utils";
 
-describe("components/victory-scatter", () => {
-  it("has expected content with shallow render", () => {
-    // This is a "shallow" render that renders only the current component
-    // without using the actual DOM.
-    //
-    // https://facebook.github.io/react/docs/test-utils.html#shallow-rendering
-    const renderer = TestUtils.createRenderer();
-    renderer.render(<Component/>);
-    // const output = renderer.getRenderOutput();
+const getElement = function (output, tagName) {
+  return ReactDOM.findDOMNode(
+    TestUtils.findRenderedDOMComponentWithTag(output, tagName)
+  );
+};
 
-    // expect(output.type).to.equal("VScatter");
-    expect(true).to.equal(true);
+let renderedComponent;
+
+describe("components/victory-axis", () => {
+  describe("default component rendering", () => {
+    before(() => {
+      renderedComponent = TestUtils.renderIntoDocument(<VictoryScatter/>);
+    });
+
+    it("renders an svg with the correct width and height", () => {
+
+      const svg = getElement(renderedComponent, "svg");
+      // default width and height
+      expect(svg.style.width).to.equal(`${VictoryScatter.defaultProps.width}px`);
+      expect(svg.style.height).to.equal(`${VictoryScatter.defaultProps.height}px`);
+    });
   });
 });
