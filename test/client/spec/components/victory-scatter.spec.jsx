@@ -16,7 +16,7 @@ const getElement = function (output, tagName) {
 
 let renderedComponent;
 
-describe("components/victory-axis", () => {
+describe("components/victory-scatter", () => {
   describe("default component rendering", () => {
     before(() => {
       renderedComponent = TestUtils.renderIntoDocument(<VictoryScatter/>);
