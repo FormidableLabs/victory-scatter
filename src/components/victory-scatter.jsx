@@ -348,7 +348,6 @@ export default class VictoryScatter extends React.Component {
     const pointElement = (
       <Point
         key={`point-${index}`}
-        animate={this.props.animate}
         labelComponent={this.props.labelComponent}
         showLabels={this.props.showLabels}
         style={this.style}

@@ -7,7 +7,6 @@ import {VictoryLabel} from "victory-label";
 @Radium
 export default class Point extends React.Component {
   static propTypes = {
-    animate: PropTypes.object,
     data: PropTypes.shape({
       x: React.PropTypes.any,
       y: React.PropTypes.any
