@@ -1,4 +1,8 @@
-import _ from "lodash";
+import isFunction from "lodash/lang/isFunction";
+import merge from "lodash/object/merge";
+import omit from "lodash/object/omit";
+import pick from "lodash/object/pick";
+import transform from "lodash/object/transform";
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import pathHelpers from "../path-helpers";
@@ -40,25 +44,25 @@ export default class Point extends React.Component {
   }
 
   getStyle(props) {
-    const stylesFromData = _.omit(props.data, [
+    const stylesFromData = omit(props.data, [
       "x", "y", "z", "size", "symbol", "name", "label"
     ]);
-    const dataStyle = this.evaluateStyle(_.merge({}, props.style.data, stylesFromData));
+    const dataStyle = this.evaluateStyle(merge({}, props.style.data, stylesFromData));
     // match certain label styles to data if styles are not given
-    const matchedStyle = _.pick(dataStyle, ["opacity", "fill"]);
+    const matchedStyle = pick(dataStyle, ["opacity", "fill"]);
     const padding = props.style.labels.padding || props.size * 0.25;
-    const labelStyle = this.evaluateStyle(_.merge({padding}, matchedStyle, props.style.labels));
+    const labelStyle = this.evaluateStyle(merge({padding}, matchedStyle, props.style.labels));
     return {data: dataStyle, labels: labelStyle};
   }
 
   evaluateStyle(style) {
-    return _.transform(style, (result, value, key) => {
+    return transform(style, (result, value, key) => {
       result[key] = this.evaluateProp(value);
     });
   }
 
   evaluateProp(prop) {
-    return _.isFunction(prop) ? prop.call(this, this.props.data) : prop;
+    return isFunction(prop) ? prop.call(this, this.props.data) : prop;
   }
 
   getPath(props) {
@@ -92,7 +96,7 @@ export default class Point extends React.Component {
     }
     const component = props.labelComponent;
     const componentStyle = component && component.props.style || {};
-    const style = _.merge({}, this.style.labels, componentStyle);
+    const style = merge({}, this.style.labels, componentStyle);
     const children = component && component.props.children || props.data.label;
     const labelProps = {
       x: component && component.props.x || props.x,

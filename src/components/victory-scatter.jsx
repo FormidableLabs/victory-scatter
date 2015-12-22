@@ -1,6 +1,19 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
-import _ from "lodash";
+import take from "lodash/array/take";
+import union from "lodash/array/union";
+import zip from "lodash/array/zip";
+import pluck from "lodash/collection/pluck";
+import isArray from "lodash/lang/isArray";
+import isFunction from "lodash/lang/isFunction";
+import isNumber from "lodash/lang/isNumber";
+import isObject from "lodash/lang/isObject";
+import merge from "lodash/object/merge";
+import pick from "lodash/object/pick";
+import values from "lodash/object/values";
+import max from "lodash/math/max";
+import min from "lodash/math/min";
+import range from "lodash/utility/range";
 import d3Scale from "d3-scale";
 import Point from "./point";
 import Util from "victory-util";
@@ -212,15 +225,15 @@ export default class VictoryScatter extends React.Component {
     const style = props.style || defaultStyles;
     const {data, labels, parent} = style;
     return {
-      parent: _.merge({height: props.height, width: props.width}, parent),
-      labels: _.merge({}, defaultStyles.labels, labels),
-      data: _.merge({}, defaultStyles.data, data)
+      parent: merge({height: props.height, width: props.width}, parent),
+      labels: merge({}, defaultStyles.labels, labels),
+      data: merge({}, defaultStyles.data, data)
     };
   }
 
   getPadding(props) {
-    const padding = _.isNumber(props.padding) ? props.padding : 0;
-    const paddingObj = _.isObject(props.padding) ? props.padding : {};
+    const padding = isNumber(props.padding) ? props.padding : 0;
+    const paddingObj = isObject(props.padding) ? props.padding : {};
     return {
       top: paddingObj.top || padding,
       bottom: paddingObj.bottom || padding,
@@ -233,15 +246,13 @@ export default class VictoryScatter extends React.Component {
     let scale;
     if (props.scale && props.scale[axis]) {
       scale = props.scale[axis].copy();
-    } else if (props.scale && !_.isObject(props.scale)) {
+    } else if (props.scale && !isObject(props.scale)) {
       scale = props.scale.copy();
     } else {
       scale = d3Scale.linear().copy();
     }
-    const range = this.range[axis];
-    const domain = this.domain[axis];
-    scale.range(range);
-    scale.domain(domain);
+    scale.range(this.range[axis]);
+    scale.domain(this.domain[axis]);
     return scale;
   }
 
@@ -255,12 +266,12 @@ export default class VictoryScatter extends React.Component {
   getDomain(props, axis) {
     if (props.domain && props.domain[axis]) {
       return props.domain[axis];
-    } else if (props.domain && !_.isObject(props.domain)) {
+    } else if (props.domain && !isObject(props.domain)) {
       return props.domain;
     } else {
       return [
-        _.min(_.pluck(this.data, axis)),
-        _.max(_.pluck(this.data, axis))
+        min(pluck(this.data, axis)),
+        max(pluck(this.data, axis))
       ];
     }
   }
@@ -271,11 +282,11 @@ export default class VictoryScatter extends React.Component {
     }
     const x = this.returnOrGenerateX(props);
     const y = this.returnOrGenerateY(props, x);
-    const n = _.min([x.length, y.length]);
+    const n = min([x.length, y.length]);
     // create a dataset from x and y with n points
-    const dataset = _.zip(_.take(x, n), _.take(y, n));
+    const dataset = zip(take(x, n), take(y, n));
     // return data as an array of objects
-    return _.map(dataset, (point) => {
+    return dataset.map((point) => {
       return {x: point[0], y: point[1]};
     });
   }
@@ -291,18 +302,18 @@ export default class VictoryScatter extends React.Component {
       props.scale.x.domain() : props.scale.domain();
     const domain = domainFromProps || domainFromScale;
 
-    const samples = _.isArray(props.y) ? props.y.length : props.samples;
-    const step = _.max(domain) / samples;
+    const samples = isArray(props.y) ? props.y.length : props.samples;
+    const step = max(domain) / samples;
     // return an array of x values spaced across the domain,
     // include the maximum of the domain
-    return _.union(_.range(_.min(domain), _.max(domain), step), [_.max(domain)]);
+    return union(range(min(domain), max(domain), step), [max(domain)]);
   }
 
   returnOrGenerateY(props, x) {
-    if (_.isFunction(props.y)) {
+    if (isFunction(props.y)) {
       // if y is a function, apply the function y to to each value of the array x,
       // and return the results as an array
-      return _.map(x, (datum) => props.y(datum));
+      return x.map((datum) => props.y(datum));
     }
     // y is either a function or an array, and is never undefined
     // if it isn't a function, just return it.
@@ -319,25 +330,25 @@ export default class VictoryScatter extends React.Component {
   getSize(data) {
     const z = this.props.bubbleProperty;
     if (data.size) {
-      return _.isFunction(data.size) ? data.size : _.max([data.size, 1]);
-    } else if (_.isFunction(this.props.size)) {
+      return isFunction(data.size) ? data.size : max([data.size, 1]);
+    } else if (isFunction(this.props.size)) {
       return this.props.size;
     } else if (z && data[z]) {
       return this.getBubbleSize(data, z);
     } else {
-      return _.max([this.props.size, 1]);
+      return max([this.props.size, 1]);
     }
   }
 
   getBubbleSize(datum, z) {
     const data = this.data;
-    const zMin = _.min(_.pluck(data, z));
-    const zMax = _.max(_.pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || _.max([_.min(_.values(this.padding)), 5]);
+    const zMin = min(pluck(data, z));
+    const zMax = max(pluck(data, z));
+    const maxRadius = this.props.maxBubbleSize || max([min(values(this.padding)), 5]);
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
     const radius = Math.sqrt(area / Math.PI);
-    return _.max([radius, 1]);
+    return max([radius, 1]);
   }
 
   renderPoint(data, index) {
@@ -363,7 +374,7 @@ export default class VictoryScatter extends React.Component {
   }
 
   renderData() {
-    return _.map(this.data, (dataPoint, index) => {
+    return this.data.map((dataPoint, index) => {
       return this.renderPoint(dataPoint, index);
     });
   }
@@ -376,7 +387,7 @@ export default class VictoryScatter extends React.Component {
       // Do less work by having `VictoryAnimation` tween only values that
       // make sense to tween. In the future, allow customization of animated
       // prop whitelist/blacklist?
-      const animateData = _.pick(this.props, [
+      const animateData = pick(this.props, [
         "data", "domain", "height", "maxBubbleSize", "padding", "samples", "size",
         "style", "width", "x", "y"
       ]);
