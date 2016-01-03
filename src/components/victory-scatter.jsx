@@ -1,19 +1,12 @@
 import React from "react";
 import Radium from "radium";
-import take from "lodash/array/take";
-import union from "lodash/array/union";
-import zip from "lodash/array/zip";
 import pluck from "lodash/collection/pluck";
-import isArray from "lodash/lang/isArray";
 import isFunction from "lodash/lang/isFunction";
-import isNumber from "lodash/lang/isNumber";
 import isObject from "lodash/lang/isObject";
-import merge from "lodash/object/merge";
 import pick from "lodash/object/pick";
 import values from "lodash/object/values";
 import max from "lodash/math/max";
 import min from "lodash/math/min";
-import range from "lodash/utility/range";
 import d3Scale from "d3-scale";
 import Point from "./point";
 import {PropTypes, Chart, Data, Scale} from "victory-util";
@@ -204,7 +197,7 @@ export default class VictoryScatter extends React.Component {
   };
 
   getCalculatedValues(props) {
-    this.style = this.getStyles(props);
+    this.style = Chart.getStyles(props, defaultStyles);
     this.padding = Chart.getPadding(props);
     this.range = {
       x: Chart.getRange(props, "x"),
@@ -218,16 +211,6 @@ export default class VictoryScatter extends React.Component {
     this.scale = {
       x: this.getScale(props, "x"),
       y: this.getScale(props, "y")
-    };
-  }
-
-  getStyles(props) {
-    const style = props.style || defaultStyles;
-    const {data, labels, parent} = style;
-    return {
-      parent: merge({height: props.height, width: props.width}, parent),
-      labels: merge({}, defaultStyles.labels, labels),
-      data: merge({}, defaultStyles.data, data)
     };
   }
 
