@@ -53,7 +53,7 @@ export default class Point extends React.Component {
   }
 
   evaluateStyle(style) {
-    if (!some(style, _.isFunction)) {
+    if (!some(style, isFunction)) {
        return style;
     }
     return transform(style, (result, value, key) => {
