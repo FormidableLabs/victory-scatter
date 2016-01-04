@@ -63,7 +63,7 @@ class App extends React.Component {
       this.setState({
         data: getData()
       });
-    }, 3000);
+    }, 2000);
   }
 
   render() {
@@ -74,7 +74,7 @@ class App extends React.Component {
           width={500}
           height={500}
           domain={[0, 600]}
-          animate={{velocity: 0.03}}
+          animate={{velocity: 0.1}}
           data={this.state.data}
         />
 
