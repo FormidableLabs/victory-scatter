@@ -1,15 +1,10 @@
 import React from "react";
 import Radium from "radium";
-import pluck from "lodash/collection/pluck";
-import isFunction from "lodash/lang/isFunction";
-import isObject from "lodash/lang/isObject";
 import pick from "lodash/object/pick";
 import values from "lodash/object/values";
-import max from "lodash/math/max";
-import min from "lodash/math/min";
 import d3Scale from "d3-scale";
 import Point from "./point";
-import {PropTypes, Chart, Data, Domain, Scale} from "victory-util";
+import {PropTypes, Chart, Data, Scale} from "victory-util";
 import {VictoryAnimation} from "victory-animation";
 
 const defaultStyles = {
@@ -200,11 +195,11 @@ export default class VictoryScatter extends React.Component {
   getDomain(data, props, axis) {
     if (props.domain && props.domain[axis]) {
       return props.domain[axis];
-    } else if (props.domain && !isObject(props.domain)) {
+    } else if (props.domain && Array.isArray(props.domain)) {
       return props.domain;
     } else {
       const allData = data.map((datum) => datum[axis]);
-      return [Math.min(...allData),  Math.max(...allData)];
+      return [Math.min(...allData), Math.max(...allData)];
     }
   }
 
@@ -218,13 +213,13 @@ export default class VictoryScatter extends React.Component {
   getSize(data, calculatedProps) {
     const z = this.props.bubbleProperty;
     if (data.size) {
-      return isFunction(data.size) ? data.size : max([data.size, 1]);
-    } else if (isFunction(this.props.size)) {
+      return typeof data.size === "function" ? data.size : Math.max(data.size, 1);
+    } else if (typeof this.props.size === "function") {
       return this.props.size;
     } else if (z && data[z]) {
       return this.getBubbleSize(data, z, calculatedProps);
     } else {
-      return max([this.props.size, 1]);
+      return Math.max(this.props.size, 1);
     }
   }
 
@@ -234,8 +229,9 @@ export default class VictoryScatter extends React.Component {
       const minPadding = Math.min(...values(Chart.getPadding(this.props)));
       return Math.max(minPadding, 5);
     };
-    const zMin = min(pluck(data, z));
-    const zMax = max(pluck(data, z));
+    const zData = data.map((point) => point.z);
+    const zMin = Math.min(...zData);
+    const zMax = Math.max(...zData);
     const maxRadius = this.props.maxBubbleSize || getMaxRadius();
     const maxArea = Math.PI * Math.pow(maxRadius, 2);
     const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
@@ -276,7 +272,7 @@ export default class VictoryScatter extends React.Component {
       y: this.getDomain(data, props, "y")
     };
 
-    const getScale = (props, axis) => {
+    const getScale = (axis) => {
       const scale = Scale.getBaseScale(props, axis);
       scale.range(range[axis]);
       scale.domain(domain[axis]);
@@ -284,11 +280,11 @@ export default class VictoryScatter extends React.Component {
     };
 
     const scale = {
-      x: getScale(props, "x"),
-      y: getScale(props, "y")
+      x: getScale("x"),
+      y: getScale("y")
     };
 
-    const  calculatedProps = {data, scale, style};
+    const calculatedProps = {data, scale, style};
     return data.map((dataPoint, index) => {
       return this.renderPoint(dataPoint, index, calculatedProps);
     });
