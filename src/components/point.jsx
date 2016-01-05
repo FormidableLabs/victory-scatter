@@ -1,13 +1,11 @@
-import isFunction from "lodash/lang/isFunction";
 import merge from "lodash/object/merge";
 import omit from "lodash/object/omit";
 import pick from "lodash/object/pick";
-import some from "lodash/collection/some";
-import transform from "lodash/object/transform";
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import pathHelpers from "../path-helpers";
 import {VictoryLabel} from "victory-label";
+import {Chart} from "victory-util";
 
 @Radium
 export default class Point extends React.Component {
@@ -44,25 +42,14 @@ export default class Point extends React.Component {
     const stylesFromData = omit(props.data, [
       "x", "y", "z", "size", "symbol", "name", "label"
     ]);
-    const dataStyle = this.evaluateStyle(merge({}, props.style.data, stylesFromData));
+    const baseDataStyle = merge({}, props.style.data, stylesFromData);
+    const dataStyle = Chart.evaluateStyle(baseDataStyle, props.data);
     // match certain label styles to data if styles are not given
     const matchedStyle = pick(dataStyle, ["opacity", "fill"]);
     const padding = props.style.labels.padding || props.size * 0.25;
-    const labelStyle = this.evaluateStyle(merge({padding}, matchedStyle, props.style.labels));
+    const baseLabelStyle = merge({padding}, matchedStyle, props.style.labels);
+    const labelStyle = Chart.evaluateStyle(baseLabelStyle, props.data);
     return {data: dataStyle, labels: labelStyle};
-  }
-
-  evaluateStyle(style) {
-    if (!some(style, isFunction)) {
-      return style;
-    }
-    return transform(style, (result, value, key) => {
-      result[key] = this.evaluateProp(value);
-    });
-  }
-
-  evaluateProp(prop) {
-    return isFunction(prop) ? prop.call(this, this.props.data) : prop;
   }
 
   getPath(props) {
@@ -75,8 +62,8 @@ export default class Point extends React.Component {
       plus: pathHelpers.plus,
       star: pathHelpers.star
     };
-    const size = this.evaluateProp(props.size);
-    const symbol = this.evaluateProp(props.symbol);
+    const size = Chart.evaluateProp(props.size, props.data);
+    const symbol = Chart.evaluateProp(props.symbol, props.data);
     return pathFunctions[symbol].call(this, props.x, props.y, size);
   }
 
