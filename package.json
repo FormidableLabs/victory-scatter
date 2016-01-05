@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "builder": "~2.2.2",
-    "d3-scale": "^0.2.0",
     "builder-victory-component": "~0.0.5",
     "victory-animation": "^0.0.13",
     "victory-label": "^0.1.8",

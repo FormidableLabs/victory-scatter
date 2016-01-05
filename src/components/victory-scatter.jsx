@@ -2,7 +2,6 @@ import React from "react";
 import Radium from "radium";
 import pick from "lodash/object/pick";
 import values from "lodash/object/values";
-import d3Scale from "d3-scale";
 import Point from "./point";
 import {PropTypes, Chart, Data, Scale} from "victory-util";
 import {VictoryAnimation} from "victory-animation";
@@ -103,8 +102,9 @@ export default class VictoryScatter extends React.Component {
     samples: PropTypes.nonNegative,
     /**
      * The scale prop determines which scales your chart should use. This prop can be
-     * given as a function, or as an object that specifies separate functions for x and y.
-     * @exampes d3Scale.time(), {x: d3Scale.linear(), y:tick d3Scale.log()}
+     * given as a string specifying a supported scale ("linear", "time", "log", "sqrt"),
+     * as a d3 scale function, or as an object with scales specified for x and y
+     * @exampes d3Scale.time(), {x: "linear", y: "log"}
      */
     scale: React.PropTypes.oneOfType([
       PropTypes.scale,
@@ -182,7 +182,7 @@ export default class VictoryScatter extends React.Component {
     height: 300,
     padding: 50,
     samples: 50,
-    scale: d3Scale.linear(),
+    scale: "linear",
     showLabels: true,
     size: 3,
     standalone: true,
