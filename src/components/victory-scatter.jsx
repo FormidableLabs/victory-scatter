@@ -3,7 +3,7 @@ import Radium from "radium";
 import pick from "lodash/object/pick";
 import values from "lodash/object/values";
 import Point from "./point";
-import {PropTypes, Chart, Data, Scale} from "victory-util";
+import {PropTypes, Chart, Data, Domain, Scale} from "victory-util";
 import {VictoryAnimation} from "victory-animation";
 
 const defaultStyles = {
@@ -191,18 +191,6 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
-
-  getDomain(data, props, axis) {
-    if (props.domain && props.domain[axis]) {
-      return props.domain[axis];
-    } else if (props.domain && Array.isArray(props.domain)) {
-      return props.domain;
-    } else {
-      const allData = data.map((datum) => datum[axis]);
-      return [Math.min(...allData), Math.max(...allData)];
-    }
-  }
-
   getSymbol(data) {
     if (this.props.bubbleProperty) {
       return "circle";
@@ -268,20 +256,12 @@ export default class VictoryScatter extends React.Component {
       y: Chart.getRange(props, "y")
     };
     const domain = {
-      x: this.getDomain(data, props, "x"),
-      y: this.getDomain(data, props, "y")
+      x: Domain.getDomainFromProps(props, "x") || Domain.getDomainFromData(data, "x"),
+      y: Domain.getDomainFromProps(props, "y") || Domain.getDomainFromData(data, "y")
     };
-
-    const getScale = (axis) => {
-      const scale = Scale.getBaseScale(props, axis);
-      scale.range(range[axis]);
-      scale.domain(domain[axis]);
-      return scale;
-    };
-
     const scale = {
-      x: getScale("x"),
-      y: getScale("y")
+      x: Scale.getBaseScale(props, "x").domain(domain.x).range(range.x),
+      y: Scale.getBaseScale(props, "y").domain(domain.y).range(range.y)
     };
 
     const calculatedProps = {data, scale, style};
