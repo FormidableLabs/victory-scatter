@@ -191,6 +191,10 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
+  static getDomain = (props, axis) => {
+    return Domain.getDomain(props, axis);
+  };
+
   getSymbol(data) {
     if (this.props.bubbleProperty) {
       return "circle";
@@ -256,8 +260,8 @@ export default class VictoryScatter extends React.Component {
       y: Chart.getRange(props, "y")
     };
     const domain = {
-      x: Domain.getDomainFromProps(props, "x") || Domain.getDomainFromData(data, "x"),
-      y: Domain.getDomainFromProps(props, "y") || Domain.getDomainFromData(data, "y")
+      x: Domain.getDomain(props, "x"),
+      y: Domain.getDomain(props, "y")
     };
     const scale = {
       x: Scale.getBaseScale(props, "x").domain(domain.x).range(range.x),

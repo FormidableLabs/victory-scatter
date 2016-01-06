@@ -74,7 +74,7 @@ class App extends React.Component {
           width={500}
           height={500}
           domain={[0, 600]}
-          animate={{velocity: 0.1}}
+          animate={{velocity: 0.02}}
           data={this.state.data}
         />
 
