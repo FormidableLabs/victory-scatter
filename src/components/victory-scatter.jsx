@@ -1,10 +1,10 @@
-import React from "react";
+import React, { PropTypes } from "react";
 import Radium from "radium";
 import pick from "lodash/object/pick";
 import values from "lodash/object/values";
 import Point from "./point";
-import {PropTypes, Chart, Data, Domain, Scale} from "victory-util";
-import {VictoryAnimation} from "victory-animation";
+import { PropTypes as CustomPropTypes, Chart, Data, Domain, Scale } from "victory-util";
+import { VictoryAnimation } from "victory-animation";
 
 const defaultStyles = {
   data: {
@@ -33,12 +33,12 @@ export default class VictoryScatter extends React.Component {
      * Large datasets might animate slowly due to the inherent limits of svg rendering.
      * @examples {delay: 5, velocity: 0.02, onEnd: () => alert("woo!")}
      */
-    animate: React.PropTypes.object,
+    animate: PropTypes.object,
     /**
      * The bubbleProperty prop indicates which property of the data object should be used
      * to scale data points in a bubble chart
      */
-    bubbleProperty: React.PropTypes.string,
+    bubbleProperty: PropTypes.string,
     /**
      * The data prop specifies the data to be plotted. Data should be in the form of an array
      * of data points where each data point should be an object with x and y properties.
@@ -46,10 +46,10 @@ export default class VictoryScatter extends React.Component {
      * These properties will be interpreted and applied to the individual lines
      * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
      */
-    data: React.PropTypes.arrayOf(
-      React.PropTypes.shape({
-        x: React.PropTypes.any,
-        y: React.PropTypes.any
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        x: PropTypes.any,
+        y: PropTypes.any
       })
     ),
     /**
@@ -60,57 +60,57 @@ export default class VictoryScatter extends React.Component {
      * available information.
      * @examples [-1, 1], {x: [0, 100], y: [0, 1]}
      */
-    domain: React.PropTypes.oneOfType([
-      PropTypes.domain,
-      React.PropTypes.shape({
-        x: PropTypes.domain,
-        y: PropTypes.domain
+    domain: PropTypes.oneOfType([
+      CustomPropTypes.domain,
+      PropTypes.shape({
+        x: CustomPropTypes.domain,
+        y: CustomPropTypes.domain
       })
     ]),
     /**
      * The height props specifies the height of the chart container element in pixels
      */
-    height: PropTypes.nonNegative,
+    height: CustomPropTypes.nonNegative,
     /**
      * The labelComponent prop takes in an entire, HTML-complete label component
      * which will be used to create labels for scatter to use
      */
-    labelComponent: React.PropTypes.element,
+    labelComponent: PropTypes.element,
     /**
      * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
      */
-    maxBubbleSize: PropTypes.nonNegative,
+    maxBubbleSize: CustomPropTypes.nonNegative,
     /**
      * The padding props specifies the amount of padding in number of pixels between
      * the edge of the chart and any rendered child components. This prop can be given
      * as a number or as an object with padding specified for top, bottom, left
      * and right.
      */
-    padding: React.PropTypes.oneOfType([
-      React.PropTypes.number,
-      React.PropTypes.shape({
-        top: React.PropTypes.number,
-        bottom: React.PropTypes.number,
-        left: React.PropTypes.number,
-        right: React.PropTypes.number
+    padding: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        top: PropTypes.number,
+        bottom: PropTypes.number,
+        left: PropTypes.number,
+        right: PropTypes.number
       })
     ]),
     /**
      * The samples prop specifies how many individual points to plot when plotting
      * y as a function of x. Samples is ignored if x props are provided instead.
      */
-    samples: PropTypes.nonNegative,
+    samples: CustomPropTypes.nonNegative,
     /**
      * The scale prop determines which scales your chart should use. This prop can be
      * given as a string specifying a supported scale ("linear", "time", "log", "sqrt"),
      * as a d3 scale function, or as an object with scales specified for x and y
      * @exampes d3Scale.time(), {x: "linear", y: "log"}
      */
-    scale: React.PropTypes.oneOfType([
-      PropTypes.scale,
-      React.PropTypes.shape({
-        x: PropTypes.scale,
-        y: PropTypes.scale
+    scale: PropTypes.oneOfType([
+      CustomPropTypes.scale,
+      PropTypes.shape({
+        x: CustomPropTypes.scale,
+        y: CustomPropTypes.scale
       })
     ]),
     /**
@@ -119,20 +119,20 @@ export default class VictoryScatter extends React.Component {
      * If animations are running slowly, try setting this prop to false to cut down on
      * the number of svg nodes
      */
-    showLabels: React.PropTypes.bool,
+    showLabels: PropTypes.bool,
     /**
      * The size prop determines how to scale each data point
      */
-    size: React.PropTypes.oneOfType([
-      PropTypes.nonNegative,
-      React.PropTypes.func
+    size: PropTypes.oneOfType([
+      CustomPropTypes.nonNegative,
+      PropTypes.func
     ]),
     /**
      * The standalone prop determines whether the component will render a standalone svg
      * or a <g> tag that will be included in an external svg. Set standalone to false to
      * compose VictoryScatter with other components within an enclosing <svg> tag.
      */
-    standalone: React.PropTypes.bool,
+    standalone: PropTypes.bool,
     /**
      * The style prop specifies styles for your scatter plot. VictoryScatter relies on Radium,
      * so valid Radium style objects should work for this prop. Height, width, and
@@ -140,31 +140,31 @@ export default class VictoryScatter extends React.Component {
      * are used to calculate the alignment of components within chart.
      * @examples {parent: {margin: 50}, data: {fill: "red"}, labels: {padding: 20}}
      */
-    style: React.PropTypes.shape({
-      parent: React.PropTypes.object,
-      data: React.PropTypes.object,
-      labels: React.PropTypes.object
+    style: PropTypes.shape({
+      parent: PropTypes.object,
+      data: PropTypes.object,
+      labels: PropTypes.object
     }),
     /**
      * The symbol prop determines which symbol should be drawn to represent data points.
      */
-    symbol: React.PropTypes.oneOfType([
-      React.PropTypes.oneOf([
+    symbol: PropTypes.oneOfType([
+      PropTypes.oneOf([
         "circle", "diamond", "plus", "square", "star", "triangleDown", "triangleUp"
       ]),
-      React.PropTypes.func
+      PropTypes.func
     ]),
     /**
      * The width props specifies the width of the chart container element in pixels
      */
-    width: PropTypes.nonNegative,
+    width: CustomPropTypes.nonNegative,
     /**
      * The x prop provides another way to supply data for scatter to plot. This prop can be given
      * as an array of values, and it will be plotted against whatever y prop is provided. If no
      * props are provided for y, the values in x will be plotted as the identity function.
      * @examples [1, 2, 3]
      */
-    x: PropTypes.homogeneousArray,
+    x: CustomPropTypes.homogeneousArray,
     /**
      * The y prop provides another way to supply data for scatter to plot. This prop can be given
      * as a function of x, or an array of values. If x props are given, they will be used
@@ -172,9 +172,9 @@ export default class VictoryScatter extends React.Component {
      * evenly spaced across the x domain will be calculated, and used for plotting data points.
      * @examples (x) => Math.sin(x), [1, 2, 3]
      */
-    y: React.PropTypes.oneOfType([
-      React.PropTypes.array,
-      React.PropTypes.func
+    y: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.func
     ])
   };
 
