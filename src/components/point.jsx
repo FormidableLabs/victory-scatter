@@ -3,9 +3,9 @@ import omit from "lodash/object/omit";
 import pick from "lodash/object/pick";
 import React, { PropTypes } from "react";
 import Radium from "radium";
-import pathHelpers from "../path-helpers";
 import {VictoryLabel} from "victory-label";
-import {Chart} from "victory-util";
+import { getPath } from "../helper-methods";
+import { Chart } from "victory-util";
 
 @Radium
 export default class Point extends React.Component {
@@ -52,26 +52,12 @@ export default class Point extends React.Component {
     return {data: dataStyle, labels: labelStyle};
   }
 
-  getPath(props) {
-    const pathFunctions = {
-      circle: pathHelpers.circle,
-      square: pathHelpers.square,
-      diamond: pathHelpers.diamond,
-      triangleDown: pathHelpers.triangleDown,
-      triangleUp: pathHelpers.triangleUp,
-      plus: pathHelpers.plus,
-      star: pathHelpers.star
-    };
-    const size = Chart.evaluateProp(props.size, props.data);
-    const symbol = Chart.evaluateProp(props.symbol, props.data);
-    return pathFunctions[symbol].call(this, props.x, props.y, size);
-  }
 
   renderPoint(props, style) {
     return (
       <path
         style={style.data}
-        d={this.getPath(props)}
+        d={getPath(props)}
         shapeRendering="optimizeSpeed"
       />
     );

@@ -1,10 +1,10 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
 import pick from "lodash/object/pick";
-import values from "lodash/object/values";
 import Point from "./point";
 import { PropTypes as CustomPropTypes, Chart, Data, Domain, Scale } from "victory-util";
 import { VictoryAnimation } from "victory-animation";
+import * as Helpers from "../helper-methods";
 
 const defaultStyles = {
   data: {
@@ -191,52 +191,14 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
-  static getDomain = (props, axis) => {
-    return Domain.getDomain(props, axis);
-  };
-
-  getSymbol(data) {
-    if (this.props.bubbleProperty) {
-      return "circle";
-    }
-    return data.symbol || this.props.symbol;
-  }
-
-  getSize(data, calculatedProps) {
-    const z = this.props.bubbleProperty;
-    if (data.size) {
-      return typeof data.size === "function" ? data.size : Math.max(data.size, 1);
-    } else if (typeof this.props.size === "function") {
-      return this.props.size;
-    } else if (z && data[z]) {
-      return this.getBubbleSize(data, z, calculatedProps);
-    } else {
-      return Math.max(this.props.size, 1);
-    }
-  }
-
-  getBubbleSize(datum, z, calculatedProps) {
-    const data = calculatedProps.data;
-    const getMaxRadius = () => {
-      const minPadding = Math.min(...values(Chart.getPadding(this.props)));
-      return Math.max(minPadding, 5);
-    };
-    const zData = data.map((point) => point.z);
-    const zMin = Math.min(...zData);
-    const zMax = Math.max(...zData);
-    const maxRadius = this.props.maxBubbleSize || getMaxRadius();
-    const maxArea = Math.PI * Math.pow(maxRadius, 2);
-    const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
-    const radius = Math.sqrt(area / Math.PI);
-    return Math.max(radius, 1);
-  }
+  static getDomain = Domain.getDomain;
 
   renderPoint(data, index, calculatedProps) {
     const position = {
-      x: calculatedProps.scale.x.call(this, data.x),
-      y: calculatedProps.scale.y.call(this, data.y)
+      x: calculatedProps.scale.x.call(null, data.x),
+      y: calculatedProps.scale.y.call(null, data.y)
     };
-    const pointElement = (
+    return (
       <Point
         key={`point-${index}`}
         labelComponent={this.props.labelComponent}
@@ -245,12 +207,10 @@ export default class VictoryScatter extends React.Component {
         x={position.x}
         y={position.y}
         data={data}
-        size={this.getSize(data, calculatedProps)}
-        symbol={this.getSymbol(data)}
+        size={Helpers.getSize(data, calculatedProps, this.props)}
+        symbol={Helpers.getSymbol(data, this.props)}
       />
     );
-
-    return pointElement;
   }
 
   renderData(props, style) {
@@ -267,8 +227,8 @@ export default class VictoryScatter extends React.Component {
       x: Scale.getBaseScale(props, "x").domain(domain.x).range(range.x),
       y: Scale.getBaseScale(props, "y").domain(domain.y).range(range.y)
     };
-
-    const calculatedProps = {data, scale, style};
+    const z = props.bubbleProperty || "z";
+    const calculatedProps = {data, scale, style, z};
     return data.map((dataPoint, index) => {
       return this.renderPoint(dataPoint, index, calculatedProps);
     });
