@@ -4,7 +4,7 @@ import pick from "lodash/object/pick";
 import Point from "./point";
 import { PropTypes as CustomPropTypes, Chart, Data, Domain, Scale } from "victory-util";
 import { VictoryAnimation } from "victory-animation";
-import * as Helpers from "../helper-methods";
+import Helpers from "../helper-methods";
 
 const defaultStyles = {
   data: {
@@ -207,7 +207,7 @@ export default class VictoryScatter extends React.Component {
         x={position.x}
         y={position.y}
         data={data}
-        size={Helpers.getSize(data, calculatedProps, this.props)}
+        size={Helpers.getSize(data, this.props, calculatedProps)}
         symbol={Helpers.getSymbol(data, this.props)}
       />
     );
