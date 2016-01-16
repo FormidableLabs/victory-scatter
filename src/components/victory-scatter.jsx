@@ -191,7 +191,7 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
-  static getDomain = Domain.getDomain;
+  static getDomain = Domain.getDomain.bind(Domain);
 
   renderPoint(data, index, calculatedProps) {
     const position = {
