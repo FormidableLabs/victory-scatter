@@ -10,7 +10,7 @@ module.exports = {
     return data.symbol || props.symbol;
   },
 
-  getBubbleSize(datum, calculatedProps, props) {
+  getBubbleSize(datum, props, calculatedProps) {
     const {data, z} = calculatedProps;
     const getMaxRadius = () => {
       const minPadding = Math.min(...values(Chart.getPadding(props)));
@@ -32,7 +32,7 @@ module.exports = {
     } else if (typeof props.size === "function") {
       return props.size;
     } else if (data[calculatedProps.z]) {
-      return this.getBubbleSize(data, calculatedProps, props);
+      return this.getBubbleSize(data, props, calculatedProps);
     } else {
       return Math.max(props.size, 1);
     }
