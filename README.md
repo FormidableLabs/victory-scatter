@@ -3,9 +3,12 @@
 Victory Scatter
 =========================
 
-[Interactive documentation for VictoryScatter]("https://victory.formidable.com/victory-scatter")
-
 Victory Scatter creates a scatter of points from data. Scatter is a composable component, so it does not include an axis.  Check out Victory Chart for easy to use scatter plots and more.
+
+API Documentation
+-----------------
+
+Detailed documentation and interactive examples can be found at http://victory.formidable.com/victory-scatter
 
 IMPORTANT
 =========
@@ -14,11 +17,11 @@ This project is in a pre-release state. We're hard at work fixing bugs and impro
 
 ## Development
 
-Please see [DEVELOPMENT](DEVELOPMENT.md)
+Please see [DEVELOPMENT](https://github.com/FormidableLabs/builder-victory-component/blob/master/dev/DEVELOPMENT.md)
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md)
+Please see [CONTRIBUTING](https://github.com/FormidableLabs/builder-victory-component/blob/master/dev/CONTRIBUTING.md)
 
 [trav_img]: https://api.travis-ci.org/FormidableLabs/victory-scatter.svg
 [trav_site]: https://travis-ci.org/FormidableLabs/victory-scatter
