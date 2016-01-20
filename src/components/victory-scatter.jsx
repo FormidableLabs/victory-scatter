@@ -1,23 +1,10 @@
 import React, { PropTypes } from "react";
 import Radium from "radium";
-import take from "lodash/array/take";
-import union from "lodash/array/union";
-import zip from "lodash/array/zip";
-import pluck from "lodash/collection/pluck";
-import isArray from "lodash/lang/isArray";
-import isFunction from "lodash/lang/isFunction";
-import isNumber from "lodash/lang/isNumber";
-import isObject from "lodash/lang/isObject";
-import merge from "lodash/object/merge";
 import pick from "lodash/object/pick";
-import values from "lodash/object/values";
-import max from "lodash/math/max";
-import min from "lodash/math/min";
-import range from "lodash/utility/range";
-import d3Scale from "d3-scale";
 import Point from "./point";
-import Util from "victory-util";
-import {VictoryAnimation} from "victory-animation";
+import { PropTypes as CustomPropTypes, Chart, Data, Domain, Scale } from "victory-util";
+import { VictoryAnimation } from "victory-animation";
+import Helpers from "../helper-methods";
 
 const defaultStyles = {
   data: {
@@ -74,16 +61,16 @@ export default class VictoryScatter extends React.Component {
      * @examples [-1, 1], {x: [0, 100], y: [0, 1]}
      */
     domain: PropTypes.oneOfType([
-      Util.PropTypes.domain,
+      CustomPropTypes.domain,
       PropTypes.shape({
-        x: Util.PropTypes.domain,
-        y: Util.PropTypes.domain
+        x: CustomPropTypes.domain,
+        y: CustomPropTypes.domain
       })
     ]),
     /**
      * The height props specifies the height of the chart container element in pixels
      */
-    height: Util.PropTypes.nonNegative,
+    height: CustomPropTypes.nonNegative,
     /**
      * The labelComponent prop takes in an entire, HTML-complete label component
      * which will be used to create labels for scatter to use
@@ -92,7 +79,7 @@ export default class VictoryScatter extends React.Component {
     /**
      * The maxBubbleSize prop sets an upper limit for scaling data points in a bubble chart
      */
-    maxBubbleSize: Util.PropTypes.nonNegative,
+    maxBubbleSize: CustomPropTypes.nonNegative,
     /**
      * The padding props specifies the amount of padding in number of pixels between
      * the edge of the chart and any rendered child components. This prop can be given
@@ -112,17 +99,18 @@ export default class VictoryScatter extends React.Component {
      * The samples prop specifies how many individual points to plot when plotting
      * y as a function of x. Samples is ignored if x props are provided instead.
      */
-    samples: Util.PropTypes.nonNegative,
+    samples: CustomPropTypes.nonNegative,
     /**
      * The scale prop determines which scales your chart should use. This prop can be
-     * given as a function, or as an object that specifies separate functions for x and y.
-     * @exampes d3Scale.time(), {x: d3Scale.linear(), y:tick d3Scale.log()}
+     * given as a string specifying a supported scale ("linear", "time", "log", "sqrt"),
+     * as a d3 scale function, or as an object with scales specified for x and y
+     * @exampes d3Scale.time(), {x: "linear", y: "log"}
      */
     scale: PropTypes.oneOfType([
-      Util.PropTypes.scale,
+      CustomPropTypes.scale,
       PropTypes.shape({
-        x: Util.PropTypes.scale,
-        y: Util.PropTypes.scale
+        x: CustomPropTypes.scale,
+        y: CustomPropTypes.scale
       })
     ]),
     /**
@@ -136,7 +124,7 @@ export default class VictoryScatter extends React.Component {
      * The size prop determines how to scale each data point
      */
     size: PropTypes.oneOfType([
-      Util.PropTypes.nonNegative,
+      CustomPropTypes.nonNegative,
       PropTypes.func
     ]),
     /**
@@ -169,14 +157,14 @@ export default class VictoryScatter extends React.Component {
     /**
      * The width props specifies the width of the chart container element in pixels
      */
-    width: Util.PropTypes.nonNegative,
+    width: CustomPropTypes.nonNegative,
     /**
      * The x prop provides another way to supply data for scatter to plot. This prop can be given
      * as an array of values, and it will be plotted against whatever y prop is provided. If no
      * props are provided for y, the values in x will be plotted as the identity function.
      * @examples [1, 2, 3]
      */
-    x: Util.PropTypes.homogeneousArray,
+    x: CustomPropTypes.homogeneousArray,
     /**
      * The y prop provides another way to supply data for scatter to plot. This prop can be given
      * as a function of x, or an array of values. If x props are given, they will be used
@@ -194,7 +182,7 @@ export default class VictoryScatter extends React.Component {
     height: 300,
     padding: 50,
     samples: 50,
-    scale: d3Scale.linear(),
+    scale: "linear",
     showLabels: true,
     size: 3,
     standalone: true,
@@ -203,179 +191,46 @@ export default class VictoryScatter extends React.Component {
     y: (x) => x
   };
 
-  getCalculatedValues(props) {
-    this.style = this.getStyles(props);
-    this.padding = this.getPadding(props);
-    this.range = {
-      x: this.getRange(props, "x"),
-      y: this.getRange(props, "y")
-    };
-    this.data = this.getData(props);
-    this.domain = {
-      x: this.getDomain(props, "x"),
-      y: this.getDomain(props, "y")
-    };
-    this.scale = {
-      x: this.getScale(props, "x"),
-      y: this.getScale(props, "y")
-    };
-  }
+  static getDomain = Domain.getDomain.bind(Domain);
 
-  getStyles(props) {
-    const style = props.style || defaultStyles;
-    const {data, labels, parent} = style;
-    return {
-      parent: merge({height: props.height, width: props.width}, parent),
-      labels: merge({}, defaultStyles.labels, labels),
-      data: merge({}, defaultStyles.data, data)
-    };
-  }
-
-  getPadding(props) {
-    const padding = isNumber(props.padding) ? props.padding : 0;
-    const paddingObj = isObject(props.padding) ? props.padding : {};
-    return {
-      top: paddingObj.top || padding,
-      bottom: paddingObj.bottom || padding,
-      left: paddingObj.left || padding,
-      right: paddingObj.right || padding
-    };
-  }
-
-  getScale(props, axis) {
-    let scale;
-    if (props.scale && props.scale[axis]) {
-      scale = props.scale[axis].copy();
-    } else if (props.scale && !isObject(props.scale)) {
-      scale = props.scale.copy();
-    } else {
-      scale = d3Scale.linear().copy();
-    }
-    scale.range(this.range[axis]);
-    scale.domain(this.domain[axis]);
-    return scale;
-  }
-
-  getRange(props, axis) {
-    // if the range is not given in props, calculate it from width, height and margin
-    return axis === "x" ?
-      [this.padding.left, props.width - this.padding.right] :
-      [props.height - this.padding.bottom, this.padding.top];
-  }
-
-  getDomain(props, axis) {
-    if (props.domain && props.domain[axis]) {
-      return props.domain[axis];
-    } else if (props.domain && !isObject(props.domain)) {
-      return props.domain;
-    } else {
-      return [
-        min(pluck(this.data, axis)),
-        max(pluck(this.data, axis))
-      ];
-    }
-  }
-
-  getData(props) {
-    if (props.data) {
-      return props.data;
-    }
-    const x = this.returnOrGenerateX(props);
-    const y = this.returnOrGenerateY(props, x);
-    const n = min([x.length, y.length]);
-    // create a dataset from x and y with n points
-    const dataset = zip(take(x, n), take(y, n));
-    // return data as an array of objects
-    return dataset.map((point) => {
-      return {x: point[0], y: point[1]};
-    });
-  }
-
-  returnOrGenerateX(props) {
-    if (props.x) {
-      return props.x;
-    }
-    // if x is not given in props, create an array of values evenly
-    // spaced across the x domain
-    const domainFromProps = props.domain && props.domain.x || props.domain;
-    const domainFromScale = props.scale && props.scale.x ?
-      props.scale.x.domain() : props.scale.domain();
-    const domain = domainFromProps || domainFromScale;
-
-    const samples = isArray(props.y) ? props.y.length : props.samples;
-    const step = max(domain) / samples;
-    // return an array of x values spaced across the domain,
-    // include the maximum of the domain
-    return union(range(min(domain), max(domain), step), [max(domain)]);
-  }
-
-  returnOrGenerateY(props, x) {
-    if (isFunction(props.y)) {
-      // if y is a function, apply the function y to to each value of the array x,
-      // and return the results as an array
-      return x.map((datum) => props.y(datum));
-    }
-    // y is either a function or an array, and is never undefined
-    // if it isn't a function, just return it.
-    return props.y;
-  }
-
-  getSymbol(data) {
-    if (this.props.bubbleProperty) {
-      return "circle";
-    }
-    return data.symbol || this.props.symbol;
-  }
-
-  getSize(data) {
-    const z = this.props.bubbleProperty;
-    if (data.size) {
-      return isFunction(data.size) ? data.size : max([data.size, 1]);
-    } else if (isFunction(this.props.size)) {
-      return this.props.size;
-    } else if (z && data[z]) {
-      return this.getBubbleSize(data, z);
-    } else {
-      return max([this.props.size, 1]);
-    }
-  }
-
-  getBubbleSize(datum, z) {
-    const data = this.data;
-    const zMin = min(pluck(data, z));
-    const zMax = max(pluck(data, z));
-    const maxRadius = this.props.maxBubbleSize || max([min(values(this.padding)), 5]);
-    const maxArea = Math.PI * Math.pow(maxRadius, 2);
-    const area = ((datum[z] - zMin) / (zMax - zMin)) * maxArea;
-    const radius = Math.sqrt(area / Math.PI);
-    return max([radius, 1]);
-  }
-
-  renderPoint(data, index) {
+  renderPoint(data, index, calculatedProps) {
     const position = {
-      x: this.scale.x.call(this, data.x),
-      y: this.scale.y.call(this, data.y)
+      x: calculatedProps.scale.x.call(null, data.x),
+      y: calculatedProps.scale.y.call(null, data.y)
     };
-    const pointElement = (
+    return (
       <Point
         key={`point-${index}`}
         labelComponent={this.props.labelComponent}
         showLabels={this.props.showLabels}
-        style={this.style}
+        style={calculatedProps.style}
         x={position.x}
         y={position.y}
         data={data}
-        size={this.getSize(data)}
-        symbol={this.getSymbol(data)}
+        size={Helpers.getSize(data, this.props, calculatedProps)}
+        symbol={Helpers.getSymbol(data, this.props)}
       />
     );
-
-    return pointElement;
   }
 
-  renderData() {
-    return this.data.map((dataPoint, index) => {
-      return this.renderPoint(dataPoint, index);
+  renderData(props, style) {
+    const data = Data.getData(props);
+    const range = {
+      x: Chart.getRange(props, "x"),
+      y: Chart.getRange(props, "y")
+    };
+    const domain = {
+      x: Domain.getDomain(props, "x"),
+      y: Domain.getDomain(props, "y")
+    };
+    const scale = {
+      x: Scale.getBaseScale(props, "x").domain(domain.x).range(range.x),
+      y: Scale.getBaseScale(props, "y").domain(domain.y).range(range.y)
+    };
+    const z = props.bubbleProperty || "z";
+    const calculatedProps = {data, scale, style, z};
+    return data.map((dataPoint, index) => {
+      return this.renderPoint(dataPoint, index, calculatedProps);
     });
   }
 
@@ -397,11 +252,9 @@ export default class VictoryScatter extends React.Component {
           {(props) => <VictoryScatter {...this.props} {...props} animate={null}/>}
         </VictoryAnimation>
       );
-    } else {
-      this.getCalculatedValues(this.props);
     }
-    const style = this.style.parent;
-    const group = <g style={style}>{this.renderData()}</g>;
-    return this.props.standalone ? <svg style={style}>{group}</svg> : group;
+    const style = Chart.getStyles(this.props, defaultStyles);
+    const group = <g style={style.parent}>{this.renderData(this.props, style)}</g>;
+    return this.props.standalone ? <svg style={style.parent}>{group}</svg> : group;
   }
 }

@@ -1,12 +1,11 @@
-import isFunction from "lodash/lang/isFunction";
 import merge from "lodash/object/merge";
 import omit from "lodash/object/omit";
 import pick from "lodash/object/pick";
-import transform from "lodash/object/transform";
 import React, { PropTypes } from "react";
 import Radium from "radium";
-import pathHelpers from "../path-helpers";
 import {VictoryLabel} from "victory-label";
+import { getPath } from "../helper-methods";
+import { Chart } from "victory-util";
 
 @Radium
 export default class Point extends React.Component {
@@ -39,73 +38,47 @@ export default class Point extends React.Component {
     showLabels: true
   }
 
-  getCalculatedValues(props) {
-    this.style = this.getStyle(props);
-  }
-
   getStyle(props) {
     const stylesFromData = omit(props.data, [
       "x", "y", "z", "size", "symbol", "name", "label"
     ]);
-    const dataStyle = this.evaluateStyle(merge({}, props.style.data, stylesFromData));
+    const baseDataStyle = merge({}, props.style.data, stylesFromData);
+    const dataStyle = Chart.evaluateStyle(baseDataStyle, props.data);
     // match certain label styles to data if styles are not given
     const matchedStyle = pick(dataStyle, ["opacity", "fill"]);
     const padding = props.style.labels.padding || props.size * 0.25;
-    const labelStyle = this.evaluateStyle(merge({padding}, matchedStyle, props.style.labels));
+    const baseLabelStyle = merge({padding}, matchedStyle, props.style.labels);
+    const labelStyle = Chart.evaluateStyle(baseLabelStyle, props.data);
     return {data: dataStyle, labels: labelStyle};
   }
 
-  evaluateStyle(style) {
-    return transform(style, (result, value, key) => {
-      result[key] = this.evaluateProp(value);
-    });
-  }
 
-  evaluateProp(prop) {
-    return isFunction(prop) ? prop.call(this, this.props.data) : prop;
-  }
-
-  getPath(props) {
-    const pathFunctions = {
-      circle: pathHelpers.circle,
-      square: pathHelpers.square,
-      diamond: pathHelpers.diamond,
-      triangleDown: pathHelpers.triangleDown,
-      triangleUp: pathHelpers.triangleUp,
-      plus: pathHelpers.plus,
-      star: pathHelpers.star
-    };
-    const size = this.evaluateProp(props.size);
-    const symbol = this.evaluateProp(props.symbol);
-    return pathFunctions[symbol].call(this, props.x, props.y, size);
-  }
-
-  renderPoint(props) {
+  renderPoint(props, style) {
     return (
       <path
-        style={this.style.data}
-        d={this.getPath(props)}
+        style={style.data}
+        d={getPath(props)}
         shapeRendering="optimizeSpeed"
       />
     );
   }
 
-  renderLabel(props) {
+  renderLabel(props, style) {
     if (props.showLabels === false || !props.data.label) {
       return undefined;
     }
     const component = props.labelComponent;
     const componentStyle = component && component.props.style || {};
-    const style = merge({}, this.style.labels, componentStyle);
+    const labelStyle = merge({}, style.labels, componentStyle);
     const children = component && component.props.children || props.data.label;
     const labelProps = {
       x: component && component.props.x || props.x,
-      y: component && component.props.y || props.y - style.padding,
+      y: component && component.props.y || props.y - labelStyle.padding,
       dy: component && component.props.dy,
       data: props.data,
-      textAnchor: component && component.props.textAnchor || style.textAnchor,
+      textAnchor: component && component.props.textAnchor || labelStyle.textAnchor,
       verticalAnchor: component && component.props.verticalAnchor || "end",
-      style
+      style: labelStyle
     };
 
     return component ?
@@ -114,11 +87,11 @@ export default class Point extends React.Component {
   }
 
   render() {
-    this.getCalculatedValues(this.props);
+    const style = this.getStyle(this.props);
     return (
       <g>
-        {this.renderPoint(this.props)}
-        {this.renderLabel(this.props)}
+        {this.renderPoint(this.props, style)}
+        {this.renderLabel(this.props, style)}
       </g>
     );
   }
