@@ -40,8 +40,10 @@ export default class VictoryScatter extends React.Component {
      */
     bubbleProperty: PropTypes.string,
     /**
-     * The data prop specifies the data to be plotted. Data should be in the form of an array
-     * of data points where each data point should be an object with x and y properties.
+     * The data prop specifies the data to be plotted.
+     * Data should be in the form of an array of data points.
+     * Each data point may be any format you wish (depending on the `x` and `y` accessor props),
+     * but by default, an object with x and y properties is expected.
      * Other properties may be added to the data point object, such as fill, size, and symbol.
      * These properties will be interpreted and applied to the individual lines
      * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
