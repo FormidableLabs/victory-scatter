@@ -1,4 +1,5 @@
 [![Travis Status][trav_img]][trav_site]
+![](https://badge-size.herokuapp.com/FormidableLabs/victory-scatter/master/dist/victory-scatter.js.svg?compression=gzip)
 
 Victory Scatter
 =========================
