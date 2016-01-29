@@ -9,7 +9,7 @@ Victory Scatter creates a scatter of points from data. Scatter is a composable c
 API Documentation
 -----------------
 
-Detailed documentation and interactive examples can be found at http://victory.formidable.com/victory-scatter
+Detailed documentation and interactive examples can be found at http://victory.formidable.com/docs/victory-scatter
 
 IMPORTANT
 =========
