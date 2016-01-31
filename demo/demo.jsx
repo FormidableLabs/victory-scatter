@@ -3,7 +3,6 @@ import React from "react";
 import Radium from "radium";
 import _ from "lodash";
 import {VictoryScatter} from "../src/index";
-import {VictoryChart} from "victory-chart";
 import {VictoryLabel} from "victory-label";
 import bubbleData from "./bubble-data.js";
 import symbolData from "./symbol-data.js";
@@ -136,31 +135,25 @@ export default class App extends React.Component {
           ]}
         />
 
-        <ChartWrap>
-          <VictoryScatter
-            data={_.range(0, 50)}
-            x={null}
-            y={(d) => d * d * Math.random()}
-          />
-        </ChartWrap>
+        <VictoryScatter
+          data={_.range(0, 50)}
+          x={null}
+          y={(d) => d * d * Math.random()}
+        />
 
-        <ChartWrap>
-          <VictoryScatter
-            data={_.range(0, 100).map((i) => [i, i * 3287 % 100])}
-            x={0}
-            y={1}
-          />
-        </ChartWrap>
+        <VictoryScatter
+          data={_.range(0, 100).map((i) => [i, i * 3287 % 100])}
+          x={0}
+          y={1}
+        />
 
-        <ChartWrap>
-          <VictoryScatter
-            data={_.range(0, 200).map((i) => {
-              return {a: {b: [{y: i * Math.sin(i * .3)}], x: Math.cos(i * .3)}};
-            })}
-            x="a.x"
-            y="a.b[0]y"
-          />
-        </ChartWrap>
+        <VictoryScatter
+          data={_.range(0, 200).map((i) => {
+            return {a: {b: [{y: i * Math.sin(i * .3)}], x: Math.cos(i * .3)}};
+          })}
+          x="a.x"
+          y="a.b[0]y"
+        />
       </div>
     );
   }
@@ -173,26 +166,3 @@ App.propTypes = {
 App.defaultProps = {
   data: getData()
 };
-
-class ChartWrap extends React.Component {
-  static propTypes = {
-    width: React.PropTypes.number,
-    height: React.PropTypes.number,
-    children: React.PropTypes.any
-  };
-  static defaultProps = {
-    width: 350,
-    height: 250
-  };
-  // renders both a standalone chart, and a version wrapped in VictoryChart,
-  // to test both cases at once
-  render() {
-    return (
-      <div>
-        {React.cloneElement(this.props.children, this.props)}
-        <VictoryChart {...this.props}>{this.props.children}</VictoryChart>
-      </div>
-    );
-  }
-}
-
