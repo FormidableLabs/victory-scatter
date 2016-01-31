@@ -26,12 +26,31 @@ To display your own data, just pass in an array of data objects via the data pro
     ]}
  />
 ```
+VictoryScatter comes with data accessor props to make passing in data much more flexible.
+Assign a property to x or y, or process data on the fly.
 
-VictoryScatter can also plot functions:
+```playground
+<VictoryScatter
+  data={[
+    {amount: 1, yield: 1, error: 0.5},
+    {amount: 2, yield: 2, error: 1.1},
+    {amount: 3, yield: 3, error: 0},
+    {amount: 4, yield: 2, error: 0.1},
+    {amount: 5, yield: 1, error: 1.5}
+  ]}
+  x={"amount"}
+  y={(data) => (data.yield + data.error)}
+/>
+```
+
+
+VictoryScatter can also plot functions. Again, the domain is set so that the entire line is visible:
 
 ```playground
  <VictoryScatter
-    y={(x) => Math.sin(2 * Math.PI * x)}
+    y={(data) =>
+      Math.sin(2 * Math.PI * data.x)
+    }
  />
 ```
 
@@ -105,6 +124,25 @@ The following symbols are already supported. More robust symbol support coming s
       labels: {padding: 12, fontSize: 12}
     }}
  />
+```
+### Functional Styles and Props
+
+Functional styles allow elements to determine their own styles based on data
+
+```playground
+  <VictoryScatter
+    style={{
+      data: {
+        fill: (data) => data.y > 0 ?
+          "red" : "blue"
+      }
+    }}
+    symbol={(data) => data.y > 0 ?
+      "triangleUp" : "triangleDown"
+    }
+    y={(d) => Math.sin(2 * Math.PI * d.x)}
+    sample={25}
+  />
 ```
 
 ### Animating
