@@ -85,7 +85,7 @@ export default class App extends React.Component {
           width={500}
           height={500}
           symbol={(data) => data.y > 0 ? "triangleUp" : "triangleDown"}
-          y={(x) => Math.sin(2 * Math.PI * x)}
+          y={(d) => Math.sin(2 * Math.PI * d.x)}
           sample={25}
         />
 
@@ -133,6 +133,26 @@ export default class App extends React.Component {
             {x: new Date(2011, 1, 1), y: 270},
             {x: new Date(2015, 1, 1), y: 470}
           ]}
+        />
+
+        <VictoryScatter
+          data={_.range(0, 50)}
+          x={null}
+          y={(d) => d * d * Math.random()}
+        />
+
+        <VictoryScatter
+          data={_.range(0, 100).map((i) => [i, i * 3287 % 100])}
+          x={0}
+          y={1}
+        />
+
+        <VictoryScatter
+          data={_.range(0, 200).map((i) => {
+            return {a: {b: [{y: i * Math.sin(i * .3)}], x: Math.cos(i * .3)}};
+          })}
+          x="a.x"
+          y="a.b[0]y"
         />
       </div>
     );

@@ -40,18 +40,15 @@ export default class VictoryScatter extends React.Component {
      */
     bubbleProperty: PropTypes.string,
     /**
-     * The data prop specifies the data to be plotted. Data should be in the form of an array
-     * of data points where each data point should be an object with x and y properties.
+     * The data prop specifies the data to be plotted.
+     * Data should be in the form of an array of data points.
+     * Each data point may be any format you wish (depending on the `x` and `y` accessor props),
+     * but by default, an object with x and y properties is expected.
      * Other properties may be added to the data point object, such as fill, size, and symbol.
      * These properties will be interpreted and applied to the individual lines
      * @examples [{x: 1, y: 2, fill: "red"}, {x: 2, y: 3, label: "foo"}]
      */
-    data: PropTypes.arrayOf(
-      PropTypes.shape({
-        x: PropTypes.any,
-        y: PropTypes.any
-      })
-    ),
+    data: PropTypes.array,
     /**
      * The domain prop describes the range of values your chart will include. This prop can be
      * given as a array of the minimum and maximum expected values for your chart,
@@ -159,22 +156,36 @@ export default class VictoryScatter extends React.Component {
      */
     width: CustomPropTypes.nonNegative,
     /**
-     * The x prop provides another way to supply data for scatter to plot. This prop can be given
-     * as an array of values, and it will be plotted against whatever y prop is provided. If no
-     * props are provided for y, the values in x will be plotted as the identity function.
-     * @examples [1, 2, 3]
+     * The x prop specifies how to access the X value of each data point.
+     * If given as a function, it will be run on each data point, and returned value will be used.
+     * If given as an integer, it will be used as an array index for array-type data points.
+     * If given as a string, it will be used as a property key for object-type data points.
+     * If given as an array of strings, or a string containing dots or brackets,
+     * it will be used as a nested object property path (for details see Lodash docs for _.get).
+     * If `null` or `undefined`, the data value will be used as is (identity function/pass-through).
+     * @examples 0, 'x', 'x.value.nested.1.thing', 'x[2].also.nested', null, d => Math.sin(d)
      */
-    x: CustomPropTypes.homogeneousArray,
+    x: PropTypes.oneOfType([
+      PropTypes.func,
+      CustomPropTypes.allOfType([CustomPropTypes.integer, CustomPropTypes.nonNegative]),
+      PropTypes.string,
+      PropTypes.arrayOf(PropTypes.string)
+    ]),
     /**
-     * The y prop provides another way to supply data for scatter to plot. This prop can be given
-     * as a function of x, or an array of values. If x props are given, they will be used
-     * in plotting (x, y) data points. If x props are not provided, a set of x values
-     * evenly spaced across the x domain will be calculated, and used for plotting data points.
-     * @examples (x) => Math.sin(x), [1, 2, 3]
+     * The y prop specifies how to access the Y value of each data point.
+     * If given as a function, it will be run on each data point, and returned value will be used.
+     * If given as an integer, it will be used as an array index for array-type data points.
+     * If given as a string, it will be used as a property key for object-type data points.
+     * If given as an array of strings, or a string containing dots or brackets,
+     * it will be used as a nested object property path (for details see Lodash docs for _.get).
+     * If `null` or `undefined`, the data value will be used as is (identity function/pass-through).
+     * @examples 0, 'y', 'y.value.nested.1.thing', 'y[2].also.nested', null, d => Math.sin(d)
      */
     y: PropTypes.oneOfType([
-      PropTypes.array,
-      PropTypes.func
+      PropTypes.func,
+      CustomPropTypes.allOfType([CustomPropTypes.integer, CustomPropTypes.nonNegative]),
+      PropTypes.string,
+      PropTypes.arrayOf(PropTypes.string)
     ])
   };
 
@@ -188,7 +199,8 @@ export default class VictoryScatter extends React.Component {
     standalone: true,
     symbol: "circle",
     width: 450,
-    y: (x) => x
+    x: "x",
+    y: "y"
   };
 
   static getDomain = Domain.getDomain.bind(Domain);
@@ -229,8 +241,8 @@ export default class VictoryScatter extends React.Component {
     };
     const z = props.bubbleProperty || "z";
     const calculatedProps = {data, scale, style, z};
-    return data.map((dataPoint, index) => {
-      return this.renderPoint(dataPoint, index, calculatedProps);
+    return data.map((datum, index) => {
+      return this.renderPoint(datum, index, calculatedProps);
     });
   }
 
