@@ -5,14 +5,14 @@
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/formidable-labs/victory-scatter.git"
+    "url": "https://github.com/FormidableLabs/victory-scatter.git"
   },
   "author": "Angela Nicholas",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/formidable-labs/victory-scatter/issues"
+    "url": "https://github.com/FormidableLabs/victory-scatter/issues"
   },
-  "homepage": "https://github.com/formidable-labs/victory-scatter",
+  "homepage": "https://github.com/FormidableLabs/victory-scatter",
   "scripts": {
     "postinstall": "cd lib || builder run npm:postinstall || (echo 'POSTINSTALL FAILED: If using npm v2, please upgrade to npm v3. See bug https://github.com/FormidableLabs/builder/issues/35' && exit 1)",
     "preversion": "builder run npm:preversion",
